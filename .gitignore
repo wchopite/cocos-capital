@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+*.js.map
+*.tsbuildinfo
+
+# Environment (local secrets)
+.env
+.env.local
+
+# Tests coverage
+coverage/
+
+# macOS
+.DS_Store
