@@ -1,0 +1,25 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "import": [
+    "@cspell/dict-es-es"
+  ],
+  "dictionaries": [
+    "es-es",
+    "node",
+    "npm",
+    "typescript",
+    "softwareTerms"
+  ],
+  "words": [
+    "opencode"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    "dist/**",
+    "coverage/**",
+    "package-lock.json",
+    "*.tsbuildinfo",
+    "docs/**/*.svg"
+  ]
+}
