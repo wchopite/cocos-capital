@@ -44,7 +44,7 @@ docker run --rm -it postgres:17-alpine psql \
   "postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require"
 ```
 
-The schema and sample data are documented in `db/database.sql`.
+The schema and sample data are documented in `sql/database.sql`.
 
 ## ⚙️ Scripts
 

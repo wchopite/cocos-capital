@@ -49,6 +49,6 @@ infrastructure → application → domain
 
 ## Database
 
-Tables: `users`, `instruments`, `orders`, `marketdata` (see [`db/database.sql`](../db/database.sql) and [`data-model.md`](./data-model.md)).
+Tables: `users`, `instruments`, `orders`, `marketdata` (see [`sql/database.sql`](../sql/database.sql) and [`data-model.md`](./data-model.md)).
 
 `orders` is the **ledger**: positions and cash are derived from `FILLED` orders.

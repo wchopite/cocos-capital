@@ -1,6 +1,6 @@
 # Data model
 
-PostgreSQL schema (SERIAL primary keys). See [`db/database.sql`](../db/database.sql).
+PostgreSQL schema (SERIAL primary keys). See [`sql/database.sql`](../sql/database.sql).
 
 ```mermaid
 erDiagram
