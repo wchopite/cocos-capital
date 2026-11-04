@@ -8,6 +8,7 @@ import {
 } from "./shared/infrastructure/config/configuration";
 import { validateEnv } from "./shared/infrastructure/config/env.validation";
 import { DatabaseModule } from "./shared/infrastructure/database/database.module";
+import { ObservabilityModule } from "./shared/infrastructure/observability/observability.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { DatabaseModule } from "./shared/infrastructure/database/database.module
       validate: validateEnv,
       load: [appConfig, databaseConfig],
     }),
+    ObservabilityModule,
     DatabaseModule,
   ],
   controllers: [AppController],
