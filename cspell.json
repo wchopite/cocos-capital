@@ -18,7 +18,8 @@
     "opencode",
     "previousclose",
     "sslmode",
-    "varchar"
+    "varchar",
+    "YPFD"
   ],
   "ignorePaths": [
     "node_modules/**",
