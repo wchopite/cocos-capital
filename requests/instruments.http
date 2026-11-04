@@ -1,0 +1,10 @@
+@host = http://localhost:3000
+
+### Search by ticker
+GET {{host}}/instruments?q=ypf
+
+### Search by name
+GET {{host}}/instruments?q=banco
+
+### Search by partial name
+GET {{host}}/instruments?q=gas
