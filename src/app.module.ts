@@ -9,6 +9,7 @@ import {
 } from "./shared/infrastructure/config/configuration";
 import { validateEnv } from "./shared/infrastructure/config/env.validation";
 import { DatabaseModule } from "./shared/infrastructure/database/database.module";
+import { HealthModule } from "./shared/infrastructure/health/health.module";
 import { AllExceptionsFilter } from "./shared/infrastructure/http/all-exceptions.filter";
 import { DomainExceptionFilter } from "./shared/infrastructure/http/domain-exception.filter";
 import { ObservabilityModule } from "./shared/infrastructure/observability/observability.module";
@@ -22,6 +23,7 @@ import { ObservabilityModule } from "./shared/infrastructure/observability/obser
     }),
     ObservabilityModule,
     DatabaseModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [
