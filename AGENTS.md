@@ -26,7 +26,14 @@ NestJS backend: a brokerage API with three modules — **instruments** (catalog 
 - Identifiers in English; code comments in English.
 - **No comments** unless explicitly requested.
 - Conventional Commits, single-line subjects. Scopes: `instruments`, `orders`, `portfolio`, `shared`, `api`, `db`, `observability`, `security`, `deps`, `tooling`, `docs`, `http`.
-- Committed docs: `README.md`. Files under `docs/` are internal and must stay **untracked**.
+- Committed docs: `README.md` and `docs/`. Working notes live in `notes/` (untracked).
+- User identification: via the `X-User-Id` header (no auth). Replaced by the JWT-derived user when auth is added — keep it out of the URL path.
+
+## Documentation
+
+- Committed documentation: `README.md` and `docs/` (architecture, data model, order lifecycle, endpoints).
+- Keep them in sync: whenever you change code, domain rules, endpoints, or scripts, verify and update `README.md` and `docs/` accordingly.
+- Also update `.env.example` when you add an env var, and `CONTRIBUTING.md` when the DoD or conventions change.
 
 ## Do not break
 

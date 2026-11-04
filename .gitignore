@@ -13,5 +13,8 @@ dist/
 # Tests coverage
 coverage/
 
+# Internal working notes
+notes/
+
 # macOS
 .DS_Store

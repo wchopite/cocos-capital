@@ -12,10 +12,13 @@
     "softwareTerms"
   ],
   "words": [
+    "Documentá",
+    "isready",
     "marketdata",
     "opencode",
     "previousclose",
-    "sslmode"
+    "sslmode",
+    "varchar"
   ],
   "ignorePaths": [
     "node_modules/**",
@@ -24,6 +27,7 @@
     "db/**",
     "package-lock.json",
     "*.tsbuildinfo",
-    "docs/**/*.svg"
+    "docs/**/*.svg",
+    "docker-compose.yaml"
   ]
 }
