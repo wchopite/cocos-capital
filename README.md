@@ -73,5 +73,5 @@ The diagrams are written in [Mermaid](https://mermaid.js.org/) and render native
 
 VS Code extensions used in this repo:
 
-- **REST Client** (`humao.rest-client`) — run the request files in [`requests/`](./requests) directly from the editor.
+- **REST Client** (`humao.rest-client`, by Huachao Mao) — run the request files in [`requests/`](./requests) directly from the editor.
 - **Markdown Preview Mermaid Support** (`bierner.markdown-mermaid`) — preview the Mermaid diagrams in `docs/` locally.
