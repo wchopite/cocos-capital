@@ -12,12 +12,16 @@
     "softwareTerms"
   ],
   "words": [
-    "opencode"
+    "marketdata",
+    "opencode",
+    "previousclose",
+    "sslmode"
   ],
   "ignorePaths": [
     "node_modules/**",
     "dist/**",
     "coverage/**",
+    "db/**",
     "package-lock.json",
     "*.tsbuildinfo",
     "docs/**/*.svg"
