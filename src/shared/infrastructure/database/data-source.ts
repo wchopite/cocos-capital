@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { DataSource } from "typeorm";
+import { LowerCaseNamingStrategy } from "./lower-case-naming.strategy";
 
 if (existsSync(".env")) {
   process.loadEnvFile();
@@ -18,5 +19,6 @@ export const AppDataSource = new DataSource({
   ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false,
   entities: [join(baseDir, "../../../**/*.orm-entity.{ts,js}")],
   migrations: [join(baseDir, "migrations/*.{ts,js}")],
+  namingStrategy: new LowerCaseNamingStrategy(),
   synchronize: (process.env.DB_SYNCHRONIZE ?? "false") === "true",
 });
