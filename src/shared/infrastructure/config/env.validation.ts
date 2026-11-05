@@ -21,6 +21,10 @@ class EnvironmentVariables {
   LOG_LEVEL?: string;
 
   @IsOptional()
+  @IsBoolean()
+  LOG_PRETTY?: boolean;
+
+  @IsOptional()
   @IsString()
   DB_HOST?: string;
 

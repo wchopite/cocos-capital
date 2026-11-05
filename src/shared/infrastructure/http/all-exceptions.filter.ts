@@ -4,15 +4,18 @@ import {
   type ExceptionFilter,
   HttpException,
   HttpStatus,
-  Logger,
 } from "@nestjs/common";
 import type { Request, Response } from "express";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { ErrorResponseDto } from "./error-response.dto";
 import { getRequestId } from "./get-request-id";
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger(AllExceptionsFilter.name);
+  public constructor(
+    @InjectPinoLogger(AllExceptionsFilter.name)
+    private readonly logger: PinoLogger,
+  ) {}
 
   public catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -25,7 +28,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const { error, message } = this.readHttpException(exception);
 
       if (statusCode >= 500) {
-        this.logger.error(exception.message, exception.stack);
+        this.logger.error(
+          {
+            statusCode,
+            method: request.method,
+            url: request.url,
+            err: exception,
+          },
+          exception.message,
+        );
       }
 
       response
@@ -34,17 +45,35 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return;
     }
 
+    const statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+
     if (exception instanceof Error) {
-      this.logger.error(exception.message, exception.stack);
+      this.logger.error(
+        {
+          statusCode,
+          method: request.method,
+          url: request.url,
+          err: exception,
+        },
+        exception.message,
+      );
     } else {
-      this.logger.error("Non-Error value thrown", exception);
+      this.logger.error(
+        {
+          statusCode,
+          method: request.method,
+          url: request.url,
+          value: exception,
+        },
+        "Non-Error value thrown",
+      );
     }
 
     response
-      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .status(statusCode)
       .json(
         new ErrorResponseDto(
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          statusCode,
           "Internal Server Error",
           "Internal server error",
           requestId,

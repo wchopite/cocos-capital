@@ -4,7 +4,10 @@ export const appConfig = registerAs("app", () => ({
   env: process.env.NODE_ENV ?? "development",
   port: Number.parseInt(process.env.PORT ?? "3000", 10),
   logLevel: process.env.LOG_LEVEL ?? "info",
-  logPretty: process.env.NODE_ENV !== "production",
+  logPretty:
+    process.env.LOG_PRETTY !== undefined
+      ? process.env.LOG_PRETTY === "true"
+      : process.env.NODE_ENV === "development",
 }));
 
 export const databaseConfig = registerAs("database", () => ({
