@@ -187,6 +187,8 @@ npm run db:setup            # run migrations + seed
 npm run start:dev
 ```
 
+Swagger UI (interactive API docs) is available at `http://localhost:3000/api` in development.
+
 ## 🗄️ Database
 
 The challenge provides a **PostgreSQL** database (Neon, in the cloud) with sample data.
@@ -253,7 +255,8 @@ Design documentation lives in [`docs/`](./docs):
 
 The diagrams are written in [Mermaid](https://mermaid.js.org/) and render natively on GitHub (see [Recommended extensions](#-recommended-extensions) to preview them locally).
 
-Ready-to-run request examples (REST Client) live in [`requests/`](./requests).
+Ready-to-run request examples (REST Client) live in [`requests/`](./requests). You can also try the
+API interactively via **Swagger UI** at `http://localhost:3000/api` (development only).
 
 ## 🔌 Recommended extensions
 
