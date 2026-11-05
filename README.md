@@ -118,6 +118,8 @@ Sin auth (scope del challenge), pero con las defensas base de una API productiva
 - **ValidationPipe** con `whitelist` + `forbidNonWhitelisted`: campos inesperados se rechazan, no se ignoran.
 - **Redaction** de headers sensibles en los logs (ver observabilidad).
 
+> **Rate limiting** — lo dejé fuera del scope (es un challenge sin auth). En producción lo agregaría con `@nestjs/throttler` por usuario (y Redis como backend si hay varias instancias), más estricto en `POST /orders` que en los `GET`.
+
 El usuario se identifica por el header **`X-User-Id`**; cuando se agregue auth, ese header se reemplaza por el `JWT` y las rutas no cambian.
 
 ### Observabilidad: requestId en cada línea
