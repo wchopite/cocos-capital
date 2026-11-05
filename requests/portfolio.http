@@ -1,0 +1,10 @@
+@host = http://localhost:3000
+@userId = 1
+
+### Get the portfolio (total value, available cash and positions)
+GET {{host}}/portfolio
+X-User-Id: {{userId}}
+
+### Get the portfolio for another user (empty)
+GET {{host}}/portfolio
+X-User-Id: 2
