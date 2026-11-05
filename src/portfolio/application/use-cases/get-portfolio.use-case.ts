@@ -1,4 +1,5 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { computePortfolio } from "../../domain/valuation";
 import type { Portfolio } from "../../domain/models/portfolio";
 import type { Quote } from "../../domain/models/quote";
@@ -19,6 +20,9 @@ export class GetPortfolioUseCase implements GetPortfolio {
     private readonly holdingsProvider: HoldingsProvider,
     @Inject(QUOTE_PROVIDER)
     private readonly quoteProvider: QuoteProvider,
+    @Optional()
+    @InjectPinoLogger(GetPortfolioUseCase.name)
+    private readonly logger?: PinoLogger,
   ) {}
 
   public async execute(userId: number): Promise<Portfolio> {
@@ -32,6 +36,13 @@ export class GetPortfolioUseCase implements GetPortfolio {
       quotes.set(position.instrumentId, quote);
     }
 
-    return computePortfolio(holdings, quotes);
+    const portfolio = computePortfolio(holdings, quotes);
+
+    this.logger?.debug(
+      { userId, positionCount: portfolio.positions.length },
+      "portfolio computed",
+    );
+
+    return portfolio;
   }
 }

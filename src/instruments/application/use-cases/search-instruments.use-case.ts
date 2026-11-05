@@ -1,4 +1,5 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import type { Instrument } from "../../domain/models/instrument";
 import type { SearchInstruments } from "../../domain/ports/in/search-instruments.port";
 import {
@@ -11,9 +12,19 @@ export class SearchInstrumentsUseCase implements SearchInstruments {
   public constructor(
     @Inject(INSTRUMENT_REPOSITORY)
     private readonly instrumentRepository: InstrumentRepository,
+    @Optional()
+    @InjectPinoLogger(SearchInstrumentsUseCase.name)
+    private readonly logger?: PinoLogger,
   ) {}
 
-  public execute(query: string): Promise<Instrument[]> {
-    return this.instrumentRepository.search(query);
+  public async execute(query: string): Promise<Instrument[]> {
+    const instruments = await this.instrumentRepository.search(query);
+
+    this.logger?.debug(
+      { q: query, resultCount: instruments.length },
+      "instruments searched",
+    );
+
+    return instruments;
   }
 }

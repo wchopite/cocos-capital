@@ -1,4 +1,5 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { OrderNotFoundError } from "../../domain/errors/order-not-found.error";
 import { OrderNotCancellableError } from "../../domain/errors/order-not-cancellable.error";
 import { OrderStatus, type Order } from "../../domain/models/order";
@@ -13,6 +14,9 @@ export class CancelOrderUseCase implements CancelOrder {
   public constructor(
     @Inject(ORDER_REPOSITORY)
     private readonly orderRepository: OrderRepository,
+    @Optional()
+    @InjectPinoLogger(CancelOrderUseCase.name)
+    private readonly logger?: PinoLogger,
   ) {}
 
   public async execute(userId: number, orderId: number): Promise<Order> {
@@ -26,6 +30,16 @@ export class CancelOrderUseCase implements CancelOrder {
       throw new OrderNotCancellableError(orderId, order.status);
     }
 
-    return this.orderRepository.updateStatus(orderId, OrderStatus.CANCELLED);
+    const cancelled = await this.orderRepository.updateStatus(
+      orderId,
+      OrderStatus.CANCELLED,
+    );
+
+    this.logger?.info(
+      { orderId, userId, status: OrderStatus.CANCELLED },
+      "order cancelled",
+    );
+
+    return cancelled;
   }
 }

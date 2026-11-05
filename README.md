@@ -101,7 +101,13 @@ El saldo se deriva de `orders`, así que para validar "¿le alcanza?" no hay una
 
 ### Observabilidad: requestId en cada línea
 
-Logs con **pino** y **`requestId`** en cada línea (eco del header `X-Request-Id`, o UUID si no viene). El envelope de error siempre incluye `{ statusCode, error, message, requestId }`, así correlacionas una respuesta con su request en los logs.
+Logs estructurados (JSON) con **pino** + **nestjs-pino**. Cada línea lleva **`reqId`** (eco del header `X-Request-Id`, o UUID si no viene), generado por `pino-http` y propagado a los use cases vía `AsyncLocalStorage`: podés filtrar todas las líneas de una request. El envelope de error siempre incluye `{ statusCode, error, message, requestId }`, así correlacionas una respuesta con su request en los logs.
+
+- **Niveles**: writes en `info` (ej. `order placed { id, status, userId }`), reads en `debug`, errores de dominio en `warn`, excepciones 5xx en `error`.
+- **Seguridad**: redaction de headers sensibles (`authorization`, `cookie`, `x-api-key`, `proxy-authorization`) → `[REDACTED]`. No logueo el body del request ni la valuación total de la cuenta.
+- **Config**: `LOG_LEVEL` (default `info`) y `LOG_PRETTY` (pino-pretty, default solo en `development`).
+
+Detalle en [`docs/observability.md`](docs/observability.md).
 
 ### Health check
 
@@ -196,6 +202,7 @@ Design documentation lives in [`docs/`](./docs):
 - [`order-lifecycle.md`](./docs/order-lifecycle.md) — order state machine.
 - [`endpoints.md`](./docs/endpoints.md) — the API endpoints.
 - [`sequence-diagrams/`](./docs/sequence-diagrams/README.md) — per-endpoint sequence diagrams through the hexagonal layers.
+- [`observability.md`](./docs/observability.md) — logging: requestId propagation, levels, redaction.
 
 The diagrams are written in [Mermaid](https://mermaid.js.org/) and render natively on GitHub (see [Recommended extensions](#-recommended-extensions) to preview them locally).
 

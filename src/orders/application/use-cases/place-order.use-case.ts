@@ -1,4 +1,5 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { computeHoldings } from "../../domain/ledger";
 import {
   OrderSide,
@@ -26,6 +27,9 @@ export class PlaceOrderUseCase implements PlaceOrder {
     private readonly orderRepository: OrderRepository,
     @Inject(QUOTE_PROVIDER)
     private readonly quoteProvider: QuoteProvider,
+    @Optional()
+    @InjectPinoLogger(PlaceOrderUseCase.name)
+    private readonly logger?: PinoLogger,
   ) {}
 
   public async execute(input: PlaceOrderInput): Promise<Order> {
@@ -34,6 +38,10 @@ export class PlaceOrderUseCase implements PlaceOrder {
         input.idempotencyKey,
       );
       if (existing !== null) {
+        this.logger?.debug(
+          { orderId: existing.id, idempotencyKey: input.idempotencyKey },
+          "order replayed from idempotency key",
+        );
         return existing;
       }
     }
@@ -45,7 +53,7 @@ export class PlaceOrderUseCase implements PlaceOrder {
 
     const size = input.size ?? Math.floor(input.amount! / price);
 
-    return this.orderRepository.withUserLock(
+    const order = await this.orderRepository.withUserLock(
       input.userId,
       async ({ filledOrders, save }) => {
         const status = this.decideStatus(input, size, price, filledOrders);
@@ -63,6 +71,22 @@ export class PlaceOrderUseCase implements PlaceOrder {
         });
       },
     );
+
+    this.logger?.info(
+      {
+        orderId: order.id,
+        userId: order.userId,
+        instrumentId: order.instrumentId,
+        side: order.side,
+        type: order.type,
+        status: order.status,
+        size: order.size,
+        price: order.price,
+      },
+      "order placed",
+    );
+
+    return order;
   }
 
   private decideStatus(
