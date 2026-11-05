@@ -31,6 +31,7 @@ erDiagram
     varchar side
     varchar status
     timestamp datetime
+    varchar idempotencyKey
   }
 
   MARKETDATA {
@@ -51,4 +52,4 @@ erDiagram
 - **`instruments.type`**: `ACCIONES` (stocks) or `MONEDA` (currency). ARS is `MONEDA` (id 66).
 - **`orders` is the ledger**: positions and cash are derived from `FILLED` orders (there is no materialized balance table).
 - **`marketdata.date`** is `DATE` (not `datetime` as the challenge prose said).
-- **Schema improvements (migrations)**: CHECK constraints on `side`/`type`/`status`, indexes on `orders.userId`, `orders.status`, `marketdata.instrumentId`.
+- **Schema improvements (migrations)**: CHECK constraints on `side`/`type`/`status`, indexes on `orders.userId`, `orders.status`, `marketdata.instrumentId`, and a unique index on `orders.idempotencyKey` (nullable; enables idempotent order placement).

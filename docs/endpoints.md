@@ -154,4 +154,5 @@ sequenceDiagram
 - **MARKET** uses the last `close`; **LIMIT** requires `price`.
 - **Insufficient** → saved as `REJECTED` (BUY validates cash, SELL validates held shares).
 - **Cancel** only works on `NEW` orders; otherwise it returns a conflict error (409).
+- **Idempotency** → `POST /orders` accepts the `Idempotency-Key` header: if the server has already seen that key, it returns the original order instead of duplicating it.
 - See [`order-lifecycle.md`](./order-lifecycle.md) for the state machine.

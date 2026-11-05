@@ -69,3 +69,4 @@ The `size` column depends on `side`:
 ## Notes
 
 - `NEW` orders do **not** reserve cash or shares: available cash and held shares are computed from `FILLED` orders only.
+- **Idempotency** → `POST /orders` accepts the `Idempotency-Key` header; a repeated key returns the already-placed order instead of duplicating it.
