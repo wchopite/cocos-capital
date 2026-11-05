@@ -48,6 +48,33 @@ describe("computePortfolio", () => {
     expect(portfolio.positions).toEqual([]);
     expect(portfolio.totalValue).toBe(0);
   });
+
+  it("skips non-positive positions", () => {
+    const holdings: Holdings = {
+      availableCash: 100000,
+      positions: [
+        { instrumentId: 31, quantity: -10 },
+        { instrumentId: 47, quantity: 40 },
+      ],
+    };
+
+    const quotes = new Map<number, Quote>([
+      [31, { instrumentId: 31, close: 150280, previousClose: 152025 }],
+      [47, { instrumentId: 47, close: 92585, previousClose: 92180 }],
+    ]);
+
+    const portfolio = computePortfolio(holdings, quotes);
+
+    expect(portfolio.positions).toEqual([
+      {
+        instrumentId: 47,
+        quantity: 40,
+        marketValue: 3703400,
+        dailyReturn: 0.44,
+      },
+    ]);
+    expect(portfolio.totalValue).toBe(3803400);
+  });
 });
 
 describe("computeDailyReturn", () => {

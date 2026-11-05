@@ -10,6 +10,10 @@ export function computePortfolio(
   const positions: PortfolioPosition[] = [];
 
   for (const position of holdings.positions) {
+    if (position.quantity <= 0) {
+      continue;
+    }
+
     const quote = quotes.get(position.instrumentId);
     if (quote === undefined) {
       continue;
