@@ -3,7 +3,7 @@ import {
   type StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
 import { DataSource } from "typeorm";
-import { InitialSchema1793807788545 } from "../../src/shared/infrastructure/database/migrations/1793807788545-InitialSchema";
+import { migrations } from "../../src/shared/infrastructure/database/migrations";
 import { runSeed } from "../../src/shared/infrastructure/database/seeds/seed";
 
 export async function startTestDatabase(): Promise<StartedPostgreSqlContainer> {
@@ -32,7 +32,9 @@ export async function startTestDatabase(): Promise<StartedPostgreSqlContainer> {
   await dataSource.initialize();
 
   const queryRunner = dataSource.createQueryRunner();
-  await new InitialSchema1793807788545().up(queryRunner);
+  for (const Migration of migrations) {
+    await new Migration().up(queryRunner);
+  }
   await queryRunner.release();
 
   await runSeed(dataSource);
