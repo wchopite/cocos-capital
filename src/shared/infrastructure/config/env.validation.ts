@@ -1,4 +1,4 @@
-import { plainToInstance } from "class-transformer";
+import { Transform, Type, plainToInstance } from "class-transformer";
 import {
   IsBoolean,
   IsNumber,
@@ -7,6 +7,14 @@ import {
   validateSync,
 } from "class-validator";
 
+const toBoolean = ({ value }: { value: unknown }): boolean | undefined => {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  return value === true || value === "true" || value === "1";
+};
+
 class EnvironmentVariables {
   @IsOptional()
   @IsString()
@@ -14,6 +22,7 @@ class EnvironmentVariables {
 
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
   PORT?: number;
 
   @IsOptional()
@@ -22,6 +31,7 @@ class EnvironmentVariables {
 
   @IsOptional()
   @IsBoolean()
+  @Transform(toBoolean)
   LOG_PRETTY?: boolean;
 
   @IsOptional()
@@ -30,6 +40,7 @@ class EnvironmentVariables {
 
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
   DB_PORT?: number;
 
   @IsOptional()
@@ -46,19 +57,19 @@ class EnvironmentVariables {
 
   @IsOptional()
   @IsBoolean()
+  @Transform(toBoolean)
   DB_SSL?: boolean;
 
   @IsOptional()
   @IsBoolean()
+  @Transform(toBoolean)
   DB_SYNCHRONIZE?: boolean;
 }
 
 export function validateEnv(
   config: Record<string, unknown>,
 ): EnvironmentVariables {
-  const validated = plainToInstance(EnvironmentVariables, config, {
-    enableImplicitConversion: true,
-  });
+  const validated = plainToInstance(EnvironmentVariables, config);
 
   const errors = validateSync(validated, { skipMissingProperties: false });
 
