@@ -1,0 +1,62 @@
+import { computeDailyReturn, computePortfolio } from "./valuation";
+import type { Holdings } from "./models/holdings";
+import type { Quote } from "./models/quote";
+
+describe("computePortfolio", () => {
+  it("computes cash, market values and total value", () => {
+    const holdings: Holdings = {
+      availableCash: 100000,
+      positions: [
+        { instrumentId: 47, quantity: 40 },
+        { instrumentId: 54, quantity: 500 },
+      ],
+    };
+
+    const quotes = new Map<number, Quote>([
+      [47, { instrumentId: 47, close: 92585, previousClose: 92180 }],
+      [54, { instrumentId: 54, close: 25000, previousClose: 26000 }],
+    ]);
+
+    const portfolio = computePortfolio(holdings, quotes);
+
+    expect(portfolio.availableCash).toBe(100000);
+    expect(portfolio.positions).toEqual([
+      {
+        instrumentId: 47,
+        quantity: 40,
+        marketValue: 3703400,
+        dailyReturn: 0.44,
+      },
+      {
+        instrumentId: 54,
+        quantity: 500,
+        marketValue: 12500000,
+        dailyReturn: -3.85,
+      },
+    ]);
+    expect(portfolio.totalValue).toBe(16303400);
+  });
+
+  it("skips positions without a quote", () => {
+    const holdings: Holdings = {
+      availableCash: 0,
+      positions: [{ instrumentId: 47, quantity: 40 }],
+    };
+
+    const portfolio = computePortfolio(holdings, new Map());
+
+    expect(portfolio.positions).toEqual([]);
+    expect(portfolio.totalValue).toBe(0);
+  });
+});
+
+describe("computeDailyReturn", () => {
+  it("computes the daily return percentage", () => {
+    expect(computeDailyReturn(92585, 92180)).toBe(0.44);
+    expect(computeDailyReturn(25000, 26000)).toBe(-3.85);
+  });
+
+  it("returns 0 when previousClose is 0", () => {
+    expect(computeDailyReturn(100, 0)).toBe(0);
+  });
+});
