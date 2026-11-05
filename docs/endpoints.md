@@ -11,6 +11,9 @@ There is **no authentication** (challenge scope): the user is identified by the 
 | 3 | `POST` | `/orders` | send an order (`BUY`/`SELL`, `MARKET`/`LIMIT`) |
 | 4 | `DELETE` | `/orders/:orderId` | cancel a `NEW` order |
 
+> **Detailed sequence diagrams** (one per endpoint, through the hexagonal layers) live in
+> [`sequence-diagrams/`](./sequence-diagrams/README.md).
+
 ## 1. Portfolio
 
 Composes positions/cash (from `orders`) with prices (from `instruments`).

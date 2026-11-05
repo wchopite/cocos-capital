@@ -195,6 +195,7 @@ Design documentation lives in [`docs/`](./docs):
 - [`data-model.md`](./docs/data-model.md) — database schema.
 - [`order-lifecycle.md`](./docs/order-lifecycle.md) — order state machine.
 - [`endpoints.md`](./docs/endpoints.md) — the API endpoints.
+- [`sequence-diagrams/`](./docs/sequence-diagrams/README.md) — per-endpoint sequence diagrams through the hexagonal layers.
 
 The diagrams are written in [Mermaid](https://mermaid.js.org/) and render natively on GitHub (see [Recommended extensions](#-recommended-extensions) to preview them locally).
 

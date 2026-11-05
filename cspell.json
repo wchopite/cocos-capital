@@ -29,6 +29,7 @@
     "package-lock.json",
     "*.tsbuildinfo",
     "docs/**/*.svg",
+    "docs/sequence-diagrams/**",
     "docker-compose.yaml"
   ]
 }
