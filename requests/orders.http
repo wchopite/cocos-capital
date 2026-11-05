@@ -50,6 +50,18 @@ Content-Type: application/json
   "size": 5
 }
 
+### BUY without enough funds (REJECTED)
+POST {{host}}/orders
+X-User-Id: {{userId}}
+Content-Type: application/json
+
+{
+  "instrumentId": 47,
+  "side": "BUY",
+  "type": "MARKET",
+  "size": 100000
+}
+
 ### Idempotent order (send twice with the same key → same order)
 POST {{host}}/orders
 X-User-Id: {{userId}}
