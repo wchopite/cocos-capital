@@ -25,7 +25,8 @@
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/shared/infrastructure/database/data-source.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/shared/infrastructure/database/data-source.ts",
     "seed": "nest build && node dist/shared/infrastructure/database/seeds/seed.js",
-    "db:setup": "npm run migration:run && npm run seed"
+    "db:setup": "npm run migration:run && npm run seed",
+    "db:recreate": "nest build && node dist/shared/infrastructure/database/reset.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
