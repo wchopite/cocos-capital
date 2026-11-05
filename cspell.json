@@ -30,6 +30,7 @@
     "*.tsbuildinfo",
     "docs/**/*.svg",
     "docs/sequence-diagrams/**",
-    "docker-compose.yaml"
+    "docker-compose.yaml",
+    "README.md"
   ]
 }

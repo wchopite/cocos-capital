@@ -22,9 +22,9 @@ Sin autenticación (scope del challenge): el usuario se identifica con el header
 
 ## Entender el dominio
 
-Antes de escribir código me tomé el tiempo de entender el negocio, porque acá están las reglas que de verdad importan:
+Antes de escribir código me tomé el tiempo de entender el negocio, porque aquí están las reglas que de verdad importan:
 
-- **Las órdenes son el ledger.** No hay una tabla de saldos: las posiciones y el cash **se derivan** de las órdenes `FILLED`. La ventaja es que el saldo nunca se desincroniza de la historia real (cero *drift*), y en un broker "no perder plata" manda.
+- **Las órdenes son el ledger.** No hay una tabla de saldos: las posiciones y el cash **se derivan** de las órdenes `FILLED`. La ventaja es que el saldo nunca se desincroniza de la historia real (cero *drift*), y en un broker "no perder dinero" es la prioridad.
 - **El cash (ARS) es un instrumento `MONEDA`** (id `66`). Las transferencias entrantes/salientes se modelan como órdenes `CASH_IN`/`CASH_OUT`.
 - **`size` depende del `side`**: para `BUY`/`SELL` son títulos; para `CASH_IN`/`CASH_OUT` son pesos.
 - **El ciclo de vida de la orden** (detalle en [`order-lifecycle.md`](docs/order-lifecycle.md)):
@@ -79,7 +79,7 @@ Ningún contexto importa el interior de otro. Se comunican por un **contrato pub
 - `orders` necesita el precio → `InstrumentsQuoteAdapter` consume `GetLatestQuote` de `instruments`.
 - `portfolio` necesita posiciones/cash y precios → `OrdersHoldingsAdapter` + `InstrumentsQuoteAdapter`.
 
-La gracia: cada contexto define **su propio** tipo (`Quote`, `Holdings`) y el adapter mapea. Si mañana un contexto cambia internamente, el resto no se entera.
+El punto: cada contexto define **su propio** tipo (`Quote`, `Holdings`) y el adapter mapea. Si mañana un contexto cambia internamente, el resto no se ve afectado.
 
 ### Monolito modular, listo para dividir
 
@@ -89,19 +89,40 @@ Hoy es un **monolito modular**: una sola app, una sola BD. Es mucho más simple 
 
 ### Money en centavos, magnitudes positivas
 
-Toda la plata viaja en **centavos (enteros)**, nunca floats. Y con una regla de signo: los valores son **siempre positivos (magnitud)**; el signo lo decide la **operación** (`side` de la orden, o la fórmula de agregación). Nunca se guarda dinero negativo. Vive en `shared/domain/money.ts` y lo usan `orders` y `portfolio`.
+Todo el dinero viaja en **centavos (enteros)**, nunca floats. Y con una regla de signo: los valores son **siempre positivos (magnitud)**; el signo lo decide la **operación** (`side` de la orden, o la fórmula de agregación). Nunca se guarda dinero negativo. Vive en `shared/domain/money.ts` y lo usan `orders` y `portfolio`.
 
 ### Idempotencia
 
-`POST /orders` acepta el header **`Idempotency-Key`**: si el server ya vio esa key, devuelve la orden original en vez de duplicarla. Evita el clásico "retry del cliente" que mete dos órdenes iguales.
+`POST /orders` acepta el header **`Idempotency-Key`**. Si el server ya vio esa key, devuelve la orden original en vez de duplicarla. En un broker esto es **crítico**: un retry del cliente (timeout, red caída, doble click) no puede terminar en dos órdenes iguales — sería duplicar una operación de dinero. La key la genera el cliente, se persiste junto a la orden (columna `idempotencyKey` con índice único) y un replay devuelve la orden ya guardada. Los retries son *at-least-once* por naturaleza; la idempotencia los vuelve *exactly-once*.
 
-### Concurrencia (no perder plata)
+### Concurrencia (no perder dinero)
 
 El saldo se deriva de `orders`, así que para validar "¿le alcanza?" no hay una columna materializada para un `UPDATE ... WHERE`. Uso **pessimistic lock por usuario** (`SELECT ... FOR UPDATE` dentro de una transacción): serializa el ciclo *leer → validar → escribir* de ese usuario, mientras usuarios distintos operan en paralelo. Lo cubre un test e2e que dispara dos órdenes concurrentes del mismo user y verifica una `FILLED` y una `REJECTED`.
 
+### Respuestas y errores consistentes
+
+Toda la API responde con una forma predecible:
+
+- **Éxito**: el DTO de salida, sin wrapper (ej. `OrderDto`, `PortfolioDto`, `InstrumentDto[]`).
+- **Error**: un único envelope `{ statusCode, error, message, requestId }`, producido por un filtro global (`DomainExceptionFilter` para errores de dominio, `AllExceptionsFilter` para el resto). El código de negocio va en `error` (ej. `ORDER_NOT_FOUND`), y `requestId` correlaciona la respuesta con su log.
+- **Validación de entrada**: `ValidationPipe` global con `whitelist` + `forbidNonWhitelisted` (rechaza campos desconocidos) y `transform`. Un body inválido → `400` con el detalle, en el mismo envelope.
+
+El cliente nunca adivina el shape: cuando algo falla, siempre es `{ statusCode, error, message, requestId }`.
+
+### Seguridad
+
+Sin auth (scope del challenge), pero con las defensas base de una API productiva:
+
+- **helmet** para headers de seguridad (`contentSecurityPolicy` desactivado: es una API, no un sitio).
+- **CORS** habilitado.
+- **ValidationPipe** con `whitelist` + `forbidNonWhitelisted`: campos inesperados se rechazan, no se ignoran.
+- **Redaction** de headers sensibles en los logs (ver observabilidad).
+
+El usuario se identifica por el header **`X-User-Id`**; cuando se agregue auth, ese header se reemplaza por el `JWT` y las rutas no cambian.
+
 ### Observabilidad: requestId en cada línea
 
-Logs estructurados (JSON) con **pino** + **nestjs-pino**. Cada línea lleva **`reqId`** (eco del header `X-Request-Id`, o UUID si no viene), generado por `pino-http` y propagado a los use cases vía `AsyncLocalStorage`: podés filtrar todas las líneas de una request. El envelope de error siempre incluye `{ statusCode, error, message, requestId }`, así correlacionas una respuesta con su request en los logs.
+Logs estructurados (JSON) con **pino** + **nestjs-pino**. Cada línea lleva **`reqId`** (eco del header `X-Request-Id`, o UUID si no viene), generado por `pino-http` y propagado a los use cases vía `AsyncLocalStorage`: puedes filtrar todas las líneas de una request. El envelope de error siempre incluye `{ statusCode, error, message, requestId }`, así correlacionas una respuesta con su request en los logs.
 
 - **Niveles**: writes en `info` (ej. `order placed { id, status, userId }`), reads en `debug`, errores de dominio en `warn`, excepciones 5xx en `error`.
 - **Seguridad**: redaction de headers sensibles (`authorization`, `cookie`, `x-api-key`, `proxy-authorization`) → `[REDACTED]`. No logueo el body del request ni la valuación total de la cuenta.
@@ -113,9 +134,13 @@ Detalle en [`docs/observability.md`](docs/observability.md).
 
 `GET /health` con `@nestjs/terminus` para que un orquestador (o un `docker compose` con healthcheck) sepa si la app está viva.
 
+### Apagado ordenado (graceful shutdown)
+
+Ante `SIGTERM`/`SIGINT` la app hace `enableShutdownHooks()`: deja de aceptar conexiones nuevas, **espera a que terminen las requests en curso** (la transacción de una orden commitea o hace rollback limpio) y solo después cierra. En un broker importa: un deploy/restart no corta una `POST /orders` a la mitad de su transacción (`FOR UPDATE` + `INSERT`). Se combina con la idempotencia: si algo igual muere, el cliente reintenta con la misma `Idempotency-Key` sin duplicar.
+
 ### Base de datos: cambios mínimos y justificados
 
-El challenge dice que tengo libertad de modificar tablas "justificando los cambios". Decidí **no tocar el esquema provisto** y solo hacer mejoras **aditivas**, por una razón simple: la BD provista (Neon) es la **referencia** que da el challenge (no la modifiqué); mis mejoras viven en las migraciones (BD local/test) y tienen que seguir siendo compatibles con ella.
+El challenge dice que tengo libertad de modificar tablas "justificando los cambios". Decidí **no cambiar el modelo de datos** (mismas tablas, mismos datos) y solo hacer mejoras **aditivas**. La BD provista (Neon) se **recrea con esas migraciones + seed** (`npm run db:recreate`): queda con los mismos datos que `sql/database.sql`, pero con el esquema endurecido y versionado por migraciones.
 
 - **Lo que SÍ agregué (aditivo, justificado):**
   - Constraints CHECK en `side`/`type`/`status` — validar en código **y** en BD.
@@ -131,11 +156,11 @@ El challenge dice que tengo libertad de modificar tablas "justificando los cambi
 
 - **Conventional Commits, commits atómicos.** Un cambio lógico por commit, con scope (`instruments`, `orders`, `portfolio`, `shared`, `db`, `docs`, …). La historia de `git log` cuenta el desarrollo por sí sola.
 - **Todo en `main`.** Decidí no simular git-flow: un único `main` con commits atómicos es más fácil de leer para un challenge. (En equipo iría trunk-based con branches cortos y PRs.)
-- **GitHub Actions** como capa extra de validación: en cada push corre `typecheck + lint + test`, además del hook local de husky/commitlint.
+- **GitHub Actions** como capa extra de validación: en cada push/PR corre el DoD completo (`typecheck + lint + lint:spell + test + test:e2e`), además del hook local de husky/commitlint.
 - **Tests en dos niveles:**
   - **unit**: reglas del dominio y use cases con fakes in-memory (rápidos, sin infra).
   - **e2e**: el flujo completo contra un **Postgres real levantado con Testcontainers** (migraciones + seed + requests HTTP). Ahí vive el **test funcional de "enviar orden"** que pide el challenge.
-- **La IA como compañera de trabajo.** Dejé configurado el flujo en `.opencode/` (`AGENTS.md`, skills `new-module`/`add-use-case`, el agente `hex-reviewer` y el comando `check`) para que el agente genere scaffolding consistente, revise la hexagonal y no rompa las reglas de la casa.
+- **La IA como compañera de trabajo.** Dejé configurado el flujo en `.opencode/` (`AGENTS.md`, skills `new-module`/`add-use-case`, el agente `hex-reviewer` y el comando `check`) para que el agente genere scaffolding consistente, revise la hexagonal y no rompa las reglas del repositorio.
 
 ## 🛠️ Tech stack
 
@@ -178,6 +203,25 @@ docker run --rm -it postgres:17-alpine psql \
 
 The schema and sample data are documented in `sql/database.sql`.
 
+### Running against Neon
+
+The app defaults to local Docker (`DB_HOST=localhost`, `DB_SSL=false`). To point it at the
+provided Neon database instead:
+
+1. In `.env`, comment out the local `DB_*` values and set the Neon credentials
+   (`DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`) with **`DB_SSL=true`**.
+2. Rebuild Neon with the migrations + seed (the provided DB has no TypeORM migration
+   history, so it needs a full recreate):
+
+   ```bash
+   npm run db:recreate
+   ```
+
+3. Run the app as usual (`npm run start:dev`).
+
+`db:recreate` drops the tables, applies the migrations and re-seeds the exact sample data,
+so Neon ends up with the same data but a hardened, migration-versioned schema.
+
 ## ⚙️ Scripts
 
 | Script | Description |
@@ -191,7 +235,8 @@ The schema and sample data are documented in `sql/database.sql`.
 | `npm run test:e2e` | End-to-end tests (Testcontainers) |
 | `npm run migration:run` / `migration:revert` | Apply / revert migrations |
 | `npm run seed` | Load sample data |
-| `npm run db:setup` | `migration:run` + `seed` |
+| `npm run db:setup` | `migration:run` + `seed` (fresh database) |
+| `npm run db:recreate` | Drop tables + `migration:run` + `seed` (existing database, e.g. Neon) |
 
 ## 📚 Documentation
 
