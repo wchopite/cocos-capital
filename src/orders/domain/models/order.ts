@@ -1,7 +1,29 @@
-export type OrderSide = "BUY" | "SELL" | "CASH_IN" | "CASH_OUT";
-export type TradeSide = "BUY" | "SELL";
-export type OrderType = "MARKET" | "LIMIT";
-export type OrderStatus = "NEW" | "FILLED" | "REJECTED" | "CANCELLED";
+export const OrderSide = {
+  BUY: "BUY",
+  SELL: "SELL",
+  CASH_IN: "CASH_IN",
+  CASH_OUT: "CASH_OUT",
+} as const;
+
+export type OrderSide = (typeof OrderSide)[keyof typeof OrderSide];
+
+export type TradeSide = (typeof OrderSide)["BUY" | "SELL"];
+
+export const OrderType = {
+  MARKET: "MARKET",
+  LIMIT: "LIMIT",
+} as const;
+
+export type OrderType = (typeof OrderType)[keyof typeof OrderType];
+
+export const OrderStatus = {
+  NEW: "NEW",
+  FILLED: "FILLED",
+  REJECTED: "REJECTED",
+  CANCELLED: "CANCELLED",
+} as const;
+
+export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 
 export interface Order {
   readonly id?: number;

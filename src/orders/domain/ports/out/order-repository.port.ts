@@ -2,7 +2,7 @@ import type { Order, OrderStatus } from "../../models/order";
 
 export interface UserLockContext {
   readonly filledOrders: Order[];
-  save(order: Order): Promise<Order>;
+  save: (order: Order) => Promise<Order>;
 }
 
 export interface OrderRepository {
