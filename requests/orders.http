@@ -1,0 +1,68 @@
+@host = http://localhost:3000
+@userId = 1
+
+### MARKET BUY (fills immediately at the last close)
+POST {{host}}/orders
+X-User-Id: {{userId}}
+Content-Type: application/json
+
+{
+  "instrumentId": 47,
+  "side": "BUY",
+  "type": "MARKET",
+  "size": 10
+}
+
+### LIMIT BUY (stays NEW until filled)
+POST {{host}}/orders
+X-User-Id: {{userId}}
+Content-Type: application/json
+
+{
+  "instrumentId": 47,
+  "side": "BUY",
+  "type": "LIMIT",
+  "size": 10,
+  "price": 900
+}
+
+### BUY by total amount (size = floor(amount / price))
+POST {{host}}/orders
+X-User-Id: {{userId}}
+Content-Type: application/json
+
+{
+  "instrumentId": 47,
+  "side": "BUY",
+  "type": "MARKET",
+  "amount": 10000
+}
+
+### SELL (fills immediately)
+POST {{host}}/orders
+X-User-Id: {{userId}}
+Content-Type: application/json
+
+{
+  "instrumentId": 47,
+  "side": "SELL",
+  "type": "MARKET",
+  "size": 5
+}
+
+### Idempotent order (send twice with the same key → same order)
+POST {{host}}/orders
+X-User-Id: {{userId}}
+Idempotency-Key: example-key-1
+Content-Type: application/json
+
+{
+  "instrumentId": 47,
+  "side": "BUY",
+  "type": "MARKET",
+  "size": 10
+}
+
+### Cancel a NEW order (replace :orderId with the returned id)
+DELETE {{host}}/orders/:orderId
+X-User-Id: {{userId}}
