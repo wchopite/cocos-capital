@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER, APP_PIPE } from "@nestjs/core";
 import { InstrumentsModule } from "./instruments/instruments.module";
 import { OrdersModule } from "./orders/orders.module";
+import { PortfolioModule } from "./portfolio/portfolio.module";
 import {
   appConfig,
   databaseConfig,
@@ -26,6 +27,7 @@ import { ObservabilityModule } from "./shared/infrastructure/observability/obser
     HealthModule,
     InstrumentsModule,
     OrdersModule,
+    PortfolioModule,
   ],
   providers: [
     {
