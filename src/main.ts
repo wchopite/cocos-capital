@@ -9,6 +9,7 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
   app.use(helmet({ contentSecurityPolicy: false }));
   app.enableCors();
+  app.enableShutdownHooks();
 
   if (process.env.NODE_ENV !== "production") {
     setupSwagger(app);
