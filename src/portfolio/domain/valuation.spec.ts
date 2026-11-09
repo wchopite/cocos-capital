@@ -13,8 +13,24 @@ describe("computePortfolio", () => {
     };
 
     const quotes = new Map<number, Quote>([
-      [47, { instrumentId: 47, close: 92585, previousClose: 92180 }],
-      [54, { instrumentId: 54, close: 25000, previousClose: 26000 }],
+      [
+        47,
+        {
+          instrumentId: 47,
+          close: 92585,
+          previousClose: 92180,
+          currency: "ARS",
+        },
+      ],
+      [
+        54,
+        {
+          instrumentId: 54,
+          close: 25000,
+          previousClose: 26000,
+          currency: "ARS",
+        },
+      ],
     ]);
 
     const portfolio = computePortfolio(holdings, quotes);
@@ -59,8 +75,24 @@ describe("computePortfolio", () => {
     };
 
     const quotes = new Map<number, Quote>([
-      [31, { instrumentId: 31, close: 150280, previousClose: 152025 }],
-      [47, { instrumentId: 47, close: 92585, previousClose: 92180 }],
+      [
+        31,
+        {
+          instrumentId: 31,
+          close: 150280,
+          previousClose: 152025,
+          currency: "ARS",
+        },
+      ],
+      [
+        47,
+        {
+          instrumentId: 47,
+          close: 92585,
+          previousClose: 92180,
+          currency: "ARS",
+        },
+      ],
     ]);
 
     const portfolio = computePortfolio(holdings, quotes);

@@ -1,8 +1,8 @@
 import { MarketDataOrmEntity } from "../entities/market-data.orm-entity";
-import { toQuote } from "./market-data.mapper";
+import { toMarketData } from "./market-data.mapper";
 
 describe("market-data.mapper", () => {
-  it("maps an entity to a Quote with cents", () => {
+  it("maps an entity to MarketData with cents", () => {
     const entity: MarketDataOrmEntity = {
       id: 1,
       instrumentId: 35,
@@ -14,7 +14,7 @@ describe("market-data.mapper", () => {
       date: "2023-07-13",
     };
 
-    expect(toQuote(entity)).toEqual({
+    expect(toMarketData(entity)).toEqual({
       instrumentId: 35,
       close: 34150,
       previousClose: 33500,

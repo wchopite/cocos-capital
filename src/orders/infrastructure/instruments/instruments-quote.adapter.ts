@@ -19,6 +19,7 @@ export class InstrumentsQuoteAdapter implements QuoteProvider {
       instrumentId: quote.instrumentId,
       price: quote.close,
       asOf: quote.asOf,
+      currency: quote.currency,
     };
   }
 }

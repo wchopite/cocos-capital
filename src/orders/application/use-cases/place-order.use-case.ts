@@ -47,17 +47,23 @@ export class PlaceOrderUseCase implements PlaceOrder {
       }
     }
 
-    const price =
-      input.type === OrderType.MARKET
-        ? (await this.quoteProvider.getLatestQuote(input.instrumentId)).price
-        : input.price!;
+    const quote = await this.quoteProvider.getLatestQuote(input.instrumentId);
+
+    const price = input.type === OrderType.MARKET ? quote.price : input.price!;
+    const currency = quote.currency;
 
     const size = input.size ?? Math.floor(input.amount! / price);
 
     const order = await this.orderRepository.withUserLock(
       input.userId,
       async ({ filledOrders, save }) => {
-        const status = this.decideStatus(input, size, price, filledOrders);
+        const status = this.decideStatus(
+          input,
+          size,
+          price,
+          currency,
+          filledOrders,
+        );
 
         return save({
           instrumentId: input.instrumentId,
@@ -67,7 +73,7 @@ export class PlaceOrderUseCase implements PlaceOrder {
           status,
           size,
           price,
-          currency: Currency.ARS,
+          currency,
           datetime: new Date(),
           idempotencyKey: input.idempotencyKey,
         });
@@ -95,13 +101,14 @@ export class PlaceOrderUseCase implements PlaceOrder {
     input: PlaceOrderInput,
     size: number,
     price: number,
+    currency: Currency,
     filledOrders: Order[],
   ): OrderStatus {
     const holdings = computeHoldings(filledOrders);
 
     const sufficient =
       input.side === OrderSide.BUY
-        ? holdings.cash[Currency.ARS] >= size * price
+        ? holdings.cash[currency] >= size * price
         : (holdings.positions.find((p) => p.instrumentId === input.instrumentId)
             ?.quantity ?? 0) >= size;
 

@@ -13,4 +13,7 @@ export class InstrumentOrmEntity {
 
   @Column()
   type: string;
+
+  @Column()
+  currency: string;
 }

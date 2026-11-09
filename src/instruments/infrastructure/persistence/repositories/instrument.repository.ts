@@ -22,4 +22,10 @@ export class TypeOrmInstrumentRepository implements InstrumentRepository {
 
     return entities.map(toDomain);
   }
+
+  public async findById(id: number): Promise<Instrument | null> {
+    const entity = await this.repository.findOne({ where: { id } });
+
+    return entity === null ? null : toDomain(entity);
+  }
 }

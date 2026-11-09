@@ -187,10 +187,10 @@ VALUES
   );
 
 INSERT INTO
-  instruments (ticker, "name", "type")
+  instruments (ticker, "name", "type", currency)
 VALUES
-  ('ARS', 'PESOS', 'MONEDA'),
-  ('USD', 'DOLARES', 'MONEDA');
+  ('ARS', 'PESOS', 'MONEDA', 'ARS'),
+  ('USD', 'DOLARES', 'MONEDA', 'USD');
 
 INSERT INTO
   "marketdata" (

@@ -51,6 +51,7 @@ function createFakes(filledOrders: Order[] = []): Fakes {
       instrumentId: 47,
       price: 93000,
       asOf: "2023-07-14",
+      currency: "ARS",
     }),
   };
 

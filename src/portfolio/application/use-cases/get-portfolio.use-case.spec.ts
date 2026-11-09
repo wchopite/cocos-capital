@@ -16,6 +16,7 @@ describe("GetPortfolioUseCase", () => {
       instrumentId: 47,
       close: 92585,
       previousClose: 92180,
+      currency: "ARS",
     } satisfies Quote);
 
     const holdingsProvider: HoldingsProvider = { getHoldings };

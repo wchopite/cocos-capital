@@ -1,3 +1,4 @@
+import type { Currency } from "../../../../shared/domain/currency";
 import type {
   Instrument,
   InstrumentType,
@@ -10,5 +11,6 @@ export function toDomain(entity: InstrumentOrmEntity): Instrument {
     ticker: entity.ticker,
     name: entity.name,
     type: entity.type as InstrumentType,
+    currency: entity.currency as Currency,
   };
 }
