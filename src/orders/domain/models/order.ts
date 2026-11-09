@@ -1,3 +1,5 @@
+import type { Currency } from "../../../shared/domain/currency";
+
 export const OrderSide = {
   BUY: "BUY",
   SELL: "SELL",
@@ -34,6 +36,7 @@ export interface Order {
   readonly status: OrderStatus;
   readonly size: number;
   readonly price: number;
+  readonly currency: Currency;
   readonly datetime: Date;
   readonly idempotencyKey?: string;
 }

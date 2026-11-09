@@ -5,7 +5,7 @@ import type { Quote } from "./models/quote";
 describe("computePortfolio", () => {
   it("computes cash, market values and total value", () => {
     const holdings: Holdings = {
-      availableCash: 100000,
+      cash: { ARS: 100000, USD: 0 },
       positions: [
         { instrumentId: 47, quantity: 40 },
         { instrumentId: 54, quantity: 500 },
@@ -39,7 +39,7 @@ describe("computePortfolio", () => {
 
   it("skips positions without a quote", () => {
     const holdings: Holdings = {
-      availableCash: 0,
+      cash: { ARS: 0, USD: 0 },
       positions: [{ instrumentId: 47, quantity: 40 }],
     };
 
@@ -51,7 +51,7 @@ describe("computePortfolio", () => {
 
   it("skips non-positive positions", () => {
     const holdings: Holdings = {
-      availableCash: 100000,
+      cash: { ARS: 100000, USD: 0 },
       positions: [
         { instrumentId: 31, quantity: -10 },
         { instrumentId: 47, quantity: 40 },

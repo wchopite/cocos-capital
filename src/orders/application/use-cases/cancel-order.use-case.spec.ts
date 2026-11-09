@@ -19,6 +19,7 @@ function makeOrder(overrides: Partial<Order>): Order {
     status: OrderStatus.NEW,
     size: 10,
     price: 92000,
+    currency: "ARS",
     datetime: new Date(),
     ...overrides,
   };

@@ -66,6 +66,7 @@ function cashOrder(): Order {
     status: OrderStatus.FILLED,
     size: 100000000,
     price: 100,
+    currency: "ARS",
     datetime: new Date(),
   };
 }

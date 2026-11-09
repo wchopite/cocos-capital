@@ -7,7 +7,7 @@ import { GetPortfolioUseCase } from "./get-portfolio.use-case";
 describe("GetPortfolioUseCase", () => {
   it("composes holdings with quotes into a portfolio", async () => {
     const holdings: Holdings = {
-      availableCash: 100000,
+      cash: { ARS: 100000, USD: 0 },
       positions: [{ instrumentId: 47, quantity: 40 }],
     };
 

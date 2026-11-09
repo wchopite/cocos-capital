@@ -1,5 +1,6 @@
 import { Inject, Injectable, Optional } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
+import { Currency } from "../../../shared/domain/currency";
 import { computeHoldings } from "../../domain/ledger";
 import {
   OrderSide,
@@ -66,6 +67,7 @@ export class PlaceOrderUseCase implements PlaceOrder {
           status,
           size,
           price,
+          currency: Currency.ARS,
           datetime: new Date(),
           idempotencyKey: input.idempotencyKey,
         });
@@ -99,7 +101,7 @@ export class PlaceOrderUseCase implements PlaceOrder {
 
     const sufficient =
       input.side === OrderSide.BUY
-        ? holdings.availableCash >= size * price
+        ? holdings.cash[Currency.ARS] >= size * price
         : (holdings.positions.find((p) => p.instrumentId === input.instrumentId)
             ?.quantity ?? 0) >= size;
 

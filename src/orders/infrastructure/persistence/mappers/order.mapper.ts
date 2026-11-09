@@ -1,3 +1,4 @@
+import type { Currency } from "../../../../shared/domain/currency";
 import {
   CENTS_PER_UNIT,
   fromCents,
@@ -23,6 +24,7 @@ export function toDomain(entity: OrderOrmEntity): Order {
     status: entity.status as OrderStatus,
     size: toSize(side, entity.size),
     price: toCents(entity.price),
+    currency: entity.currency as Currency,
     datetime: entity.datetime,
     idempotencyKey: entity.idempotencyKey ?? undefined,
   };
@@ -37,6 +39,7 @@ export function toOrm(order: Order): OrderOrmEntity {
   entity.status = order.status;
   entity.size = fromSize(order.side, order.size);
   entity.price = fromCents(order.price);
+  entity.currency = order.currency;
   entity.datetime = order.datetime;
   entity.idempotencyKey = order.idempotencyKey ?? null;
   return entity;

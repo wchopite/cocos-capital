@@ -10,6 +10,7 @@ function makeOrder(overrides: Partial<Order>): Order {
     status: OrderStatus.FILLED,
     size: 10,
     price: 93000,
+    currency: "ARS",
     datetime: new Date(),
     ...overrides,
   };
@@ -40,7 +41,7 @@ describe("computeHoldings", () => {
 
     const holdings = computeHoldings(orders);
 
-    expect(holdings.availableCash).toBe(96290000);
+    expect(holdings.cash.ARS).toBe(96290000);
     expect(holdings.positions).toEqual([{ instrumentId: 47, quantity: 40 }]);
   });
 

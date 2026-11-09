@@ -31,8 +31,8 @@ export function computePortfolio(
   }
 
   return {
-    totalValue: holdings.availableCash + marketValueTotal,
-    availableCash: holdings.availableCash,
+    totalValue: holdings.cash.ARS + marketValueTotal,
+    availableCash: holdings.cash.ARS,
     positions,
   };
 }
