@@ -1,3 +1,5 @@
+import type { Currency } from "./currency";
+
 export const CENTS_PER_UNIT = 100;
 
 const DECIMAL_PATTERN = /^\d+(\.\d+)?$/;
@@ -32,4 +34,52 @@ export function fromCents(cents: number): string {
   const fraction = (cents % CENTS_PER_UNIT).toString().padStart(2, "0");
 
   return `${whole}.${fraction}`;
+}
+
+export interface Money {
+  readonly amount: number;
+  readonly currency: Currency;
+}
+
+export function money(amount: number, currency: Currency): Money {
+  if (!Number.isInteger(amount) || amount < 0) {
+    throw new TypeError(
+      `Expected a non-negative integer amount in cents, got: ${amount}`,
+    );
+  }
+
+  return { amount, currency };
+}
+
+export function addMoney(a: Money, b: Money): Money {
+  assertSameCurrency(a, b);
+  return money(a.amount + b.amount, a.currency);
+}
+
+export function subtractMoney(a: Money, b: Money): Money {
+  assertSameCurrency(a, b);
+
+  if (a.amount < b.amount) {
+    throw new TypeError(
+      `Cannot subtract ${b.amount} from ${a.amount}: money is non-negative`,
+    );
+  }
+
+  return money(a.amount - b.amount, a.currency);
+}
+
+export function isZeroMoney(value: Money): boolean {
+  return value.amount === 0;
+}
+
+export function formatMoney(value: Money): string {
+  return `${fromCents(value.amount)} ${value.currency}`;
+}
+
+function assertSameCurrency(a: Money, b: Money): void {
+  if (a.currency !== b.currency) {
+    throw new TypeError(
+      `Cannot operate on different currencies: ${a.currency} vs ${b.currency}`,
+    );
+  }
 }
