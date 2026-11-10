@@ -54,6 +54,10 @@ sequenceDiagram
 
 > **Assumption**: "rendimiento total (%)" is interpreted as the **daily return** (`close` vs `previousClose`).
 
+> **Multi-currency**: cash and total value are tracked per currency (`ARS`/`USD`). The
+> response exposes `cash` and `totalValue` as `{ ARS, USD }` maps, and each position
+> carries the currency it trades in. No FX conversion is applied yet.
+
 ## 2. Search instruments
 
 ```mermaid

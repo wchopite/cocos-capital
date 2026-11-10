@@ -28,12 +28,12 @@ describe("GetPortfolioUseCase", () => {
 
     expect(getHoldings).toHaveBeenCalledWith(1);
     expect(getLatestQuote).toHaveBeenCalledWith(47);
-    expect(portfolio.totalValue).toBe(3803400);
+    expect(portfolio.totalValue.ARS).toBe(3803400);
     expect(portfolio.positions).toEqual([
       {
         instrumentId: 47,
         quantity: 40,
-        marketValue: 3703400,
+        marketValue: { amount: 3703400, currency: "ARS" },
         dailyReturn: 0.44,
       },
     ]);
