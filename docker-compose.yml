@@ -23,6 +23,16 @@ services:
       postgres:
         condition: service_healthy
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   app:
     profiles: ['app']
     build:
@@ -37,10 +47,13 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_DATABASE: ${DB_DATABASE:-cocos_capital}
       DB_SYNCHRONIZE: 'false'
+      REDIS_URL: 'redis://redis:6379'
     ports:
       - '3000:3000'
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
 volumes:

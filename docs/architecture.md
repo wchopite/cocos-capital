@@ -55,6 +55,13 @@ Cross-cutting pure types live in `shared/domain/`:
 | `orders` | `PlaceOrder`, `CancelOrder`, `GetHoldings` | `OrderRepository`, `QuoteProvider` |
 | `portfolio` | `GetPortfolio` | `HoldingsProvider`, `QuoteProvider` |
 
+## Caching
+
+`GetLatestQuote` is decorated with a **cache-aside** layer (`CachedGetLatestQuote`) that
+reads quotes from Redis (port `QuoteCache` → `RedisQuoteCache`) with a short TTL. On a
+cache miss it falls back to the database, and a cache failure never breaks the request
+(best-effort, graceful degradation).
+
 ## Database
 
 Tables: `users`, `instruments`, `orders`, `marketdata` (see [`sql/database.sql`](../sql/database.sql) and [`data-model.md`](./data-model.md)).
