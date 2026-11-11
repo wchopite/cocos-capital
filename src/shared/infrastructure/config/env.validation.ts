@@ -35,6 +35,11 @@ class EnvironmentVariables {
   LOG_PRETTY?: boolean;
 
   @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  QUOTE_CACHE_TTL_SECONDS?: number;
+
+  @IsOptional()
   @IsString()
   DB_HOST?: string;
 

@@ -17,7 +17,7 @@ export class OrdersHoldingsAdapter implements HoldingsProvider {
     const holdings = await this.getHoldingsUseCase.execute(userId);
 
     return {
-      availableCash: holdings.availableCash,
+      cash: holdings.cash,
       positions: holdings.positions.map((position) => ({
         instrumentId: position.instrumentId,
         quantity: position.quantity,

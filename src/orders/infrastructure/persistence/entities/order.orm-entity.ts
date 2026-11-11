@@ -18,6 +18,9 @@ export class OrderOrmEntity {
   price: string;
 
   @Column()
+  currency: string;
+
+  @Column()
   type: string;
 
   @Column()

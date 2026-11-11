@@ -20,6 +20,7 @@ export class InstrumentsQuoteAdapter implements QuoteProvider {
       instrumentId: quote.instrumentId,
       close: quote.close,
       previousClose: quote.previousClose,
+      currency: quote.currency,
     };
   }
 }

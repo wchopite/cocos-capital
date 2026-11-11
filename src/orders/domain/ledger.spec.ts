@@ -10,6 +10,7 @@ function makeOrder(overrides: Partial<Order>): Order {
     status: OrderStatus.FILLED,
     size: 10,
     price: 93000,
+    currency: "ARS",
     datetime: new Date(),
     ...overrides,
   };
@@ -40,8 +41,40 @@ describe("computeHoldings", () => {
 
     const holdings = computeHoldings(orders);
 
-    expect(holdings.availableCash).toBe(96290000);
+    expect(holdings.cash.ARS).toBe(96290000);
     expect(holdings.positions).toEqual([{ instrumentId: 47, quantity: 40 }]);
+  });
+
+  it("tracks cash per currency", () => {
+    const orders = [
+      makeOrder({
+        instrumentId: 66,
+        side: OrderSide.CASH_IN,
+        size: 100000000,
+        price: 100,
+        currency: "ARS",
+      }),
+      makeOrder({
+        instrumentId: 67,
+        side: OrderSide.CASH_IN,
+        size: 1000000,
+        price: 100,
+        currency: "USD",
+      }),
+      makeOrder({
+        instrumentId: 68,
+        side: OrderSide.BUY,
+        size: 10,
+        price: 15250,
+        currency: "USD",
+      }),
+    ];
+
+    const holdings = computeHoldings(orders);
+
+    expect(holdings.cash.ARS).toBe(100000000);
+    expect(holdings.cash.USD).toBe(847500);
+    expect(holdings.positions).toEqual([{ instrumentId: 68, quantity: 10 }]);
   });
 
   it("filters out zero-quantity positions", () => {

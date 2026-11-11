@@ -39,6 +39,14 @@ infrastructure → application → domain
 - **application** — use cases; orchestrate domain + ports.
 - **infrastructure** — persistence (TypeORM), HTTP controllers, adapters.
 
+## Shared domain
+
+Cross-cutting pure types live in `shared/domain/`:
+
+- `currency.ts` — the `Currency` type (`ARS`, `USD`).
+- `money.ts` — `toCents`/`fromCents` (pesos ↔ cents) and the `Money` value object (`{ amount, currency }`, amount in cents).
+- `errors/domain.error.ts` — the `DomainError` base class.
+
 ## Ports
 
 | Module | in-ports (offers) | out-ports (needs) |
@@ -46,6 +54,13 @@ infrastructure → application → domain
 | `instruments` | `SearchInstruments`, `GetLatestQuote` | `InstrumentRepository`, `MarketDataRepository` |
 | `orders` | `PlaceOrder`, `CancelOrder`, `GetHoldings` | `OrderRepository`, `QuoteProvider` |
 | `portfolio` | `GetPortfolio` | `HoldingsProvider`, `QuoteProvider` |
+
+## Caching
+
+`GetLatestQuote` is decorated with a **cache-aside** layer (`CachedGetLatestQuote`) that
+reads quotes from Redis (port `QuoteCache` → `RedisQuoteCache`) with a short TTL. On a
+cache miss it falls back to the database, and a cache failure never breaks the request
+(best-effort, graceful degradation).
 
 ## Database
 

@@ -1,4 +1,14 @@
-import { CENTS_PER_UNIT, fromCents, toCents } from "./money";
+import { Currency } from "./currency";
+import {
+  CENTS_PER_UNIT,
+  addMoney,
+  formatMoney,
+  fromCents,
+  isZeroMoney,
+  money,
+  subtractMoney,
+  toCents,
+} from "./money";
 
 describe("money", () => {
   describe("toCents", () => {
@@ -45,5 +55,56 @@ describe("money", () => {
 
   it("exposes the cents constant", () => {
     expect(CENTS_PER_UNIT).toBe(100);
+  });
+});
+
+describe("Money", () => {
+  it("creates a money value from cents and a currency", () => {
+    expect(money(90000, Currency.ARS)).toEqual({
+      amount: 90000,
+      currency: "ARS",
+    });
+  });
+
+  it("rejects negative or fractional amounts", () => {
+    expect(() => money(-1, Currency.ARS)).toThrow(TypeError);
+    expect(() => money(1.5, Currency.ARS)).toThrow(TypeError);
+  });
+
+  it("adds money of the same currency", () => {
+    expect(addMoney(money(100, Currency.ARS), money(50, Currency.ARS))).toEqual(
+      {
+        amount: 150,
+        currency: "ARS",
+      },
+    );
+  });
+
+  it("rejects adding money of different currencies", () => {
+    expect(() =>
+      addMoney(money(100, Currency.ARS), money(50, Currency.USD)),
+    ).toThrow(TypeError);
+  });
+
+  it("subtracts money of the same currency", () => {
+    expect(
+      subtractMoney(money(100, Currency.ARS), money(30, Currency.ARS)),
+    ).toEqual({ amount: 70, currency: "ARS" });
+  });
+
+  it("rejects subtracting more than available", () => {
+    expect(() =>
+      subtractMoney(money(100, Currency.ARS), money(150, Currency.ARS)),
+    ).toThrow(TypeError);
+  });
+
+  it("knows when money is zero", () => {
+    expect(isZeroMoney(money(0, Currency.ARS))).toBe(true);
+    expect(isZeroMoney(money(5, Currency.ARS))).toBe(false);
+  });
+
+  it("formats money with its currency", () => {
+    expect(formatMoney(money(90000, Currency.ARS))).toBe("900.00 ARS");
+    expect(formatMoney(money(500, Currency.USD))).toBe("5.00 USD");
   });
 });

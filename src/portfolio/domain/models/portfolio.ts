@@ -1,12 +1,15 @@
+import type { Currency } from "../../../shared/domain/currency";
+import type { Money } from "../../../shared/domain/money";
+
 export interface PortfolioPosition {
   readonly instrumentId: number;
   readonly quantity: number;
-  readonly marketValue: number;
+  readonly marketValue: Money;
   readonly dailyReturn: number;
 }
 
 export interface Portfolio {
-  readonly totalValue: number;
-  readonly availableCash: number;
+  readonly totalValue: Record<Currency, number>;
+  readonly cash: Record<Currency, number>;
   readonly positions: PortfolioPosition[];
 }

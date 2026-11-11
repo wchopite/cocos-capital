@@ -187,9 +187,11 @@ VALUES
   );
 
 INSERT INTO
-  instruments (ticker, "name", "type")
+  instruments (ticker, "name", "type", currency)
 VALUES
-  ('ARS', 'PESOS', 'MONEDA');
+  ('ARS', 'PESOS', 'MONEDA', 'ARS'),
+  ('USD', 'DOLARES', 'MONEDA', 'USD'),
+  ('AAPL', 'Apple CEDEAR', 'ACCIONES', 'USD');
 
 INSERT INTO
   "marketdata" (
@@ -1482,6 +1484,36 @@ VALUES
   );
 
 INSERT INTO
+  "marketdata" (
+    instrumentId,
+    "date",
+    "open",
+    high,
+    low,
+    "close",
+    previousclose
+  )
+VALUES
+  (
+    68,
+    '2023-07-13',
+    148.00000000,
+    151.00000000,
+    147.50000000,
+    150.00000000,
+    148.00000000
+  ),
+  (
+    68,
+    '2023-07-14',
+    150.00000000,
+    153.00000000,
+    149.50000000,
+    152.50000000,
+    150.00000000
+  );
+
+INSERT INTO
   "orders" (
     instrumentId,
     userId,
@@ -1553,6 +1585,7 @@ VALUES
     'MARKET',
     '2023-07-12 16:11:20'
   ),
+  -- Begin ------------------------------
   (
     31,
     1,
@@ -1560,9 +1593,10 @@ VALUES
     1500,
     'BUY',
     'NEW',
-    'LIMIT',
+    'LIMIT', -- Limit, no cuenta para tenencia (sigue en NEW)
     '2023-07-13 11:13:20'
   ),
+  -- End ------------------------------
   (
     66,
     1,
@@ -1573,6 +1607,7 @@ VALUES
     'MARKET',
     '2023-07-13 12:31:20'
   ),
+  -- Begin ------------------------------
   (
     31,
     1,
@@ -1583,6 +1618,7 @@ VALUES
     'LIMIT',
     '2023-07-13 12:51:20'
   ),
+  -- End ------------------------------
   (
     54,
     1,
@@ -1593,6 +1629,7 @@ VALUES
     'MARKET',
     '2023-07-13 14:11:20'
   ),
+  -- Begin ------------------------------
   (
     31,
     1,
@@ -1603,3 +1640,30 @@ VALUES
     'MARKET',
     '2023-07-13 15:13:20'
   );
+
+INSERT INTO
+  "orders" (
+    instrumentId,
+    userId,
+    size,
+    price,
+    side,
+    status,
+    type,
+    datetime,
+    currency
+  )
+VALUES
+  (
+    67,
+    1,
+    10000,
+    1,
+    'CASH_IN',
+    'FILLED',
+    'MARKET',
+    '2023-07-12 12:00:00',
+    'USD'
+  );
+
+-- -------------------------------------

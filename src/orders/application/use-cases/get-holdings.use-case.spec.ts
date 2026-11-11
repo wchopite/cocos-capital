@@ -18,6 +18,7 @@ describe("GetHoldingsUseCase", () => {
         status: OrderStatus.FILLED,
         size: 100000000,
         price: 100,
+        currency: "ARS",
         datetime: new Date(),
       },
       {
@@ -28,6 +29,7 @@ describe("GetHoldingsUseCase", () => {
         status: OrderStatus.FILLED,
         size: 50,
         price: 93000,
+        currency: "ARS",
         datetime: new Date(),
       },
     ];
@@ -45,7 +47,7 @@ describe("GetHoldingsUseCase", () => {
     const holdings = await useCase.execute(1);
 
     expect(findFilledByUser).toHaveBeenCalledWith(1);
-    expect(holdings.availableCash).toBe(95350000);
+    expect(holdings.cash.ARS).toBe(95350000);
     expect(holdings.positions).toEqual([{ instrumentId: 47, quantity: 50 }]);
   });
 });

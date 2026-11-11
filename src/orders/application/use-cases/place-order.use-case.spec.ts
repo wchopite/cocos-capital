@@ -4,6 +4,7 @@ import {
   OrderType,
   type Order,
 } from "../../domain/models/order";
+import type { Quote } from "../../domain/models/quote";
 import type {
   OrderRepository,
   UserLockContext,
@@ -16,7 +17,10 @@ interface Fakes {
   quoteProvider: QuoteProvider;
 }
 
-function createFakes(filledOrders: Order[] = []): Fakes {
+function createFakes(
+  filledOrders: Order[] = [],
+  quote: Partial<Quote> = {},
+): Fakes {
   let nextId = 1;
   const byIdempotencyKey = new Map<string, Order>();
 
@@ -51,6 +55,8 @@ function createFakes(filledOrders: Order[] = []): Fakes {
       instrumentId: 47,
       price: 93000,
       asOf: "2023-07-14",
+      currency: "ARS",
+      ...quote,
     }),
   };
 
@@ -66,6 +72,21 @@ function cashOrder(): Order {
     status: OrderStatus.FILLED,
     size: 100000000,
     price: 100,
+    currency: "ARS",
+    datetime: new Date(),
+  };
+}
+
+function usdCashOrder(): Order {
+  return {
+    instrumentId: 67,
+    userId: 1,
+    side: OrderSide.CASH_IN,
+    type: OrderType.MARKET,
+    status: OrderStatus.FILLED,
+    size: 1000000,
+    price: 100,
+    currency: "USD",
     datetime: new Date(),
   };
 }
@@ -85,6 +106,43 @@ describe("PlaceOrderUseCase", () => {
 
     expect(order.status).toBe(OrderStatus.FILLED);
     expect(order.price).toBe(93000);
+  });
+
+  it("fills a USD BUY using USD cash", async () => {
+    const { repo, quoteProvider } = createFakes([usdCashOrder()], {
+      currency: "USD",
+      price: 15250,
+    });
+    const useCase = new PlaceOrderUseCase(repo, quoteProvider);
+
+    const order = await useCase.execute({
+      userId: 1,
+      instrumentId: 68,
+      side: OrderSide.BUY,
+      type: OrderType.MARKET,
+      size: 10,
+    });
+
+    expect(order.status).toBe(OrderStatus.FILLED);
+    expect(order.currency).toBe("USD");
+  });
+
+  it("rejects a USD BUY without USD cash, even with ARS cash", async () => {
+    const { repo, quoteProvider } = createFakes([cashOrder()], {
+      currency: "USD",
+      price: 15250,
+    });
+    const useCase = new PlaceOrderUseCase(repo, quoteProvider);
+
+    const order = await useCase.execute({
+      userId: 1,
+      instrumentId: 68,
+      side: OrderSide.BUY,
+      type: OrderType.MARKET,
+      size: 10,
+    });
+
+    expect(order.status).toBe(OrderStatus.REJECTED);
   });
 
   it("places a LIMIT BUY as NEW", async () => {

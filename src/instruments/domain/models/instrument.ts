@@ -1,3 +1,5 @@
+import type { Currency } from "../../../shared/domain/currency";
+
 export type InstrumentType = "ACCIONES" | "MONEDA";
 
 export interface Instrument {
@@ -5,4 +7,5 @@ export interface Instrument {
   readonly ticker: string;
   readonly name: string;
   readonly type: InstrumentType;
+  readonly currency: Currency;
 }

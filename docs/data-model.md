@@ -19,6 +19,7 @@ erDiagram
     varchar ticker
     varchar name
     varchar type
+    varchar currency
   }
 
   ORDERS {
@@ -31,6 +32,7 @@ erDiagram
     varchar side
     varchar status
     timestamp datetime
+    varchar currency
     varchar idempotencyKey
   }
 
@@ -49,7 +51,8 @@ erDiagram
 ## Notes
 
 - **`size`'s meaning depends on `side`**: for `BUY`/`SELL` it is the number of shares; for `CASH_IN`/`CASH_OUT` it is the amount in ARS (with `price = 1`).
-- **`instruments.type`**: `ACCIONES` (stocks) or `MONEDA` (currency). ARS is `MONEDA` (id 66).
-- **`orders` is the ledger**: positions and cash are derived from `FILLED` orders (there is no materialized balance table).
+- **`instruments.type`**: `ACCIONES` (stocks) or `MONEDA` (currency). ARS is `MONEDA` (id 66), USD is `MONEDA` (id 67).
+- **`instruments.currency`**: the currency each instrument trades in (`ARS`/`USD`). The order's currency is resolved from the instrument when placing it.
+- **`orders` is the ledger**: positions and cash are derived from `FILLED` orders (there is no materialized balance table). Cash is tracked per currency (`orders.currency`), accumulated by `computeHoldings`.
 - **`marketdata.date`** is `DATE` (not `datetime` as the challenge prose said).
 - **Schema improvements (migrations)**: CHECK constraints on `side`/`type`/`status`, indexes on `orders.userId`, `orders.status`, `marketdata.instrumentId`, and a unique index on `orders.idempotencyKey` (nullable; enables idempotent order placement).

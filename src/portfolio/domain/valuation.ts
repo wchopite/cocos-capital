@@ -1,3 +1,5 @@
+import type { Currency } from "../../shared/domain/currency";
+import { money } from "../../shared/domain/money";
 import type { Holdings } from "./models/holdings";
 import type { Portfolio, PortfolioPosition } from "./models/portfolio";
 import type { Quote } from "./models/quote";
@@ -6,7 +8,7 @@ export function computePortfolio(
   holdings: Holdings,
   quotes: Map<number, Quote>,
 ): Portfolio {
-  let marketValueTotal = 0;
+  const marketValueByCurrency: Record<Currency, number> = { ARS: 0, USD: 0 };
   const positions: PortfolioPosition[] = [];
 
   for (const position of holdings.positions) {
@@ -20,19 +22,24 @@ export function computePortfolio(
     }
 
     const marketValue = position.quantity * quote.close;
-    marketValueTotal += marketValue;
+    marketValueByCurrency[quote.currency] += marketValue;
 
     positions.push({
       instrumentId: position.instrumentId,
       quantity: position.quantity,
-      marketValue,
+      marketValue: money(marketValue, quote.currency),
       dailyReturn: computeDailyReturn(quote.close, quote.previousClose),
     });
   }
 
+  const totalValue: Record<Currency, number> = {
+    ARS: holdings.cash.ARS + marketValueByCurrency.ARS,
+    USD: holdings.cash.USD + marketValueByCurrency.USD,
+  };
+
   return {
-    totalValue: holdings.availableCash + marketValueTotal,
-    availableCash: holdings.availableCash,
+    totalValue,
+    cash: holdings.cash,
     positions,
   };
 }

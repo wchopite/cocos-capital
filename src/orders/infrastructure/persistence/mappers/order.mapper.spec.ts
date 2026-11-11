@@ -17,6 +17,7 @@ describe("order.mapper", () => {
       status: "FILLED",
       size: 50,
       price: "930.00",
+      currency: "ARS",
       datetime: new Date("2023-07-12T12:31:20Z"),
       idempotencyKey: null,
     } as OrderOrmEntity;
@@ -32,6 +33,7 @@ describe("order.mapper", () => {
       status: OrderStatus.FILLED,
       size: 50,
       price: 93000,
+      currency: "ARS",
       datetime: entity.datetime,
       idempotencyKey: undefined,
     });
@@ -47,6 +49,7 @@ describe("order.mapper", () => {
       status: "FILLED",
       size: 1000000,
       price: "1.00",
+      currency: "ARS",
       datetime: new Date("2023-07-12T12:11:20Z"),
       idempotencyKey: null,
     } as OrderOrmEntity;
@@ -66,6 +69,7 @@ describe("order.mapper", () => {
       status: OrderStatus.FILLED,
       size: 100000000,
       price: 100,
+      currency: "ARS",
       datetime: new Date("2023-07-12T12:11:20Z"),
       idempotencyKey: "key-1",
     });
