@@ -53,6 +53,47 @@ describe("computePortfolio", () => {
     expect(portfolio.totalValue).toEqual({ ARS: 16303400, USD: 0 });
   });
 
+  it("values USD positions separately from ARS", () => {
+    const holdings: Holdings = {
+      cash: { ARS: 100000, USD: 847500 },
+      positions: [
+        { instrumentId: 47, quantity: 40 },
+        { instrumentId: 68, quantity: 10 },
+      ],
+    };
+
+    const quotes = new Map<number, Quote>([
+      [
+        47,
+        {
+          instrumentId: 47,
+          close: 92585,
+          previousClose: 92180,
+          currency: "ARS",
+        },
+      ],
+      [
+        68,
+        {
+          instrumentId: 68,
+          close: 15250,
+          previousClose: 15000,
+          currency: "USD",
+        },
+      ],
+    ]);
+
+    const portfolio = computePortfolio(holdings, quotes);
+
+    expect(portfolio.positions).toContainEqual({
+      instrumentId: 68,
+      quantity: 10,
+      marketValue: { amount: 152500, currency: "USD" },
+      dailyReturn: 1.67,
+    });
+    expect(portfolio.totalValue).toEqual({ ARS: 3803400, USD: 1000000 });
+  });
+
   it("skips positions without a quote", () => {
     const holdings: Holdings = {
       cash: { ARS: 0, USD: 0 },
