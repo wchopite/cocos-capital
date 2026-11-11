@@ -1,14 +1,12 @@
 import { readFileSync } from "node:fs";
 import type { DataSource } from "typeorm";
 import { AppDataSource } from "../data-source";
+import { splitInsertStatements } from "./split-insert-statements";
 
 export async function runSeed(dataSource: DataSource): Promise<number> {
   const sql = readFileSync("sql/database.sql", "utf8");
 
-  const inserts = sql
-    .split(";")
-    .map((stmt) => stmt.trim())
-    .filter((stmt) => stmt.toUpperCase().startsWith("INSERT"));
+  const inserts = splitInsertStatements(sql);
 
   await dataSource.query(
     "TRUNCATE marketdata, orders, instruments, users RESTART IDENTITY CASCADE",

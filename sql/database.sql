@@ -1594,7 +1594,7 @@ VALUES
     '2023-07-13 14:11:20'
   ),
   -- BMA (31): the BUY 20 (FILLED) above minus this SELL 30 leaves a -10 position
-  -- (sells 10 more than owned). Intentional short; the portfolio filters qty <= 0.
+  -- (sells 10 more than owned). Intentional short — the portfolio filters qty <= 0.
   (
     31,
     1,
