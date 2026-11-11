@@ -1,6 +1,6 @@
 # Cocos Capital — Backend Challenge
 
-Brokerage API built with NestJS. Query your portfolio, search instruments, and place/cancel orders against a market of Argentine stocks and ARS cash.
+Brokerage API built with NestJS. Query your portfolio, search instruments, and place/cancel orders against a market of Argentine stocks and CEDEARs, in multiple currencies (ARS/USD).
 
 ![CI](https://github.com/wchopite/cocos-capital/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
@@ -25,8 +25,8 @@ Sin autenticación (scope del challenge): el usuario se identifica con el header
 Antes de escribir código me tomé el tiempo de entender el negocio, porque aquí están las reglas que de verdad importan:
 
 - **Las órdenes son el ledger.** No hay una tabla de saldos: las posiciones y el cash **se derivan** de las órdenes `FILLED`. La ventaja es que el saldo nunca se desincroniza de la historia real (cero *drift*), y en un broker "no perder dinero" es la prioridad.
-- **El cash (ARS) es un instrumento `MONEDA`** (id `66`). Las transferencias entrantes/salientes se modelan como órdenes `CASH_IN`/`CASH_OUT`.
-- **`size` depende del `side`**: para `BUY`/`SELL` son títulos; para `CASH_IN`/`CASH_OUT` son pesos.
+- **El cash es un instrumento `MONEDA`**: ARS (id `66`) y USD (id `67`). Las transferencias entrantes/salientes se modelan como órdenes `CASH_IN`/`CASH_OUT`.
+- **`size` depende del `side`**: para `BUY`/`SELL` son títulos; para `CASH_IN`/`CASH_OUT` es el monto en su moneda.
 - **El ciclo de vida de la orden** (detalle en [`order-lifecycle.md`](docs/order-lifecycle.md)):
   - `MARKET` → se ejecuta al último `close` y queda `FILLED`.
   - `LIMIT` → requiere precio y queda `NEW` (no se ejecuta solo; no simulo mercado).
@@ -90,6 +90,14 @@ Hoy es un **monolito modular**: una sola app, una sola BD. Es mucho más simple 
 ### Money en centavos, magnitudes positivas
 
 Todo el dinero viaja en **centavos (enteros)**, nunca floats. Y con una regla de signo: los valores son **siempre positivos (magnitud)**; el signo lo decide la **operación** (`side` de la orden, o la fórmula de agregación). Nunca se guarda dinero negativo. Vive en `shared/domain/money.ts` y lo usan `orders` y `portfolio`.
+
+### Multi-moneda (ARS / USD)
+
+Cada instrumento cotiza en una moneda (`ARS` o `USD`), y el cash se trackea **por moneda** (`cash: { ARS, USD }`, no un solo número). La orden **toma la moneda del instrumento** (el body no pide moneda): comprar en USD valida contra el cash USD, no contra el ARS. **No hay conversión FX**: las monedas se mantienen y se reportan separadas.
+
+### Cache de cotizaciones (Redis)
+
+`GetLatestQuote` se envuelve en un **cache-aside** (`CachedGetLatestQuote`) respaldado por Redis (puerto `QuoteCache` → `RedisQuoteCache`), con TTL configurable (`QUOTE_CACHE_TTL_SECONDS`, default `30`). En un hit sirve del cache; en un miss va a Postgres y lo guarda. Si Redis está caído, **degrada a pass-through** (la request no se rompe).
 
 ### Idempotencia
 
@@ -169,8 +177,9 @@ El challenge dice que tengo libertad de modificar tablas "justificando los cambi
 - **NestJS** (TypeScript strict, CommonJS)
 - **TypeORM** (PostgreSQL, schema-first migrations)
 - **jest** + **eslint** + **prettier** + **husky** + **commitlint**
-- **Docker** (local Postgres + Adminer), **Testcontainers** (e2e)
+- **Docker** (local Postgres + Redis + Adminer), **Testcontainers** (e2e)
 - **pino** + **Swagger** + **helmet** + **terminus**
+- **Redis** (ioredis) — cache de cotizaciones
 
 ## 📋 Prerequisites
 
@@ -181,7 +190,7 @@ El challenge dice que tengo libertad de modificar tablas "justificando los cambi
 
 ```bash
 npm install
-docker compose up -d        # local Postgres + Adminer
+docker compose up -d        # local Postgres + Redis + Adminer
 cp .env.example .env        # fill in DB_* if needed
 npm run db:setup            # run migrations + seed
 npm run start:dev

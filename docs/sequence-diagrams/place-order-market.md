@@ -47,8 +47,8 @@ sequenceDiagram
     else
         QUC-->>QA: Quote
     end
-    QA-->>UC: { instrumentId, price: close, asOf }
-    Note over UC: price = close (cents)
+    QA-->>UC: { instrumentId, price: close, currency }
+    Note over UC: price = close (cents)<br/>currency = quote.currency (from the instrument)
 
     Note over UC: size = input.size ?? floor(amount / price)
 
@@ -59,7 +59,7 @@ sequenceDiagram
     DB-->>OR: filledOrders
     OR-->>UC: work({ filledOrders, save })
     Note over UC: holdings = computeHoldings(filledOrders)
-    alt insufficient (BUY: cash < size × price)
+    alt insufficient (BUY: cash[currency] < size × price)
         Note over UC: status = REJECTED (saved anyway)
     else sufficient
         Note over UC: status = FILLED (MARKET)
@@ -77,6 +77,9 @@ sequenceDiagram
 ## Notes
 
 - **Price**: `MARKET` does not take `price` in the request; it uses the `close` from `marketdata`.
+- **Currency**: the order's currency is resolved from the instrument (`quote.currency`), so a
+  USD asset validates against USD cash — not ARS. The quote is served through a cache-aside
+  decorator (`CachedGetLatestQuote` → Redis).
 - **Lock**: `SELECT ... FOR UPDATE` on `users` serializes the orders of **one** user
   (closes the read→validate→write race). Different users never block each other.
 - **Derived**: sufficiency is computed with `computeHoldings` over the `FILLED` orders

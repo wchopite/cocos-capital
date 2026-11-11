@@ -1,8 +1,8 @@
 # `POST /orders` — LIMIT
 
 A `LIMIT` order requires `price` and stays `NEW` (it is not executed on its own). If there
-aren't enough funds/shares it ends `REJECTED`. It does not query a quote: it uses the
-request `price`.
+aren't enough funds/shares it ends `REJECTED`. It queries the quote only to resolve the
+instrument's currency; the execution price comes from the request.
 
 ```mermaid
 sequenceDiagram
@@ -10,6 +10,9 @@ sequenceDiagram
     participant C as Client
     participant CTRL as OrdersController
     participant UC as PlaceOrderUseCase
+    participant QA as InstrumentsQuoteAdapter<br/>(orders → instruments)
+    participant QUC as GetLatestQuote (cached)
+    participant MR as TypeOrmMarketDataRepository
     participant OR as TypeOrmOrderRepository
     participant DB as Postgres
 
@@ -30,7 +33,15 @@ sequenceDiagram
         end
     end
 
-    Note over UC: price = input.price (cents)<br/>size = input.size ?? floor(amount / price)
+    UC->>QA: getLatestQuote(instrumentId)
+    QA->>QUC: execute(instrumentId)
+    QUC->>MR: findLatestQuote(instrumentId)  (cache miss)
+    MR->>DB: SELECT ... WHERE instrument_id = $1<br/>ORDER BY date DESC, id DESC LIMIT 1
+    DB-->>MR: MarketDataOrmEntity
+    MR-->>QUC: Quote
+    QUC-->>QA: Quote
+    QA-->>UC: { currency }
+    Note over UC: currency = quote.currency (from the instrument)<br/>price = input.price (cents)<br/>size = input.size ?? floor(amount / price)
 
     UC->>OR: withUserLock(userId, work)
     OR->>DB: BEGIN
@@ -39,7 +50,7 @@ sequenceDiagram
     DB-->>OR: filledOrders
     OR-->>UC: work({ filledOrders, save })
     Note over UC: holdings = computeHoldings(filledOrders)
-    alt insufficient
+    alt insufficient (BUY: cash[currency] < size × price)
         Note over UC: status = REJECTED (saved anyway)
     else sufficient
         Note over UC: status = NEW (LIMIT waits)
@@ -56,6 +67,9 @@ sequenceDiagram
 
 ## Notes
 
+- **Currency**: even though the price is `input.price`, the use case still queries the quote
+  (through a cache-aside `CachedGetLatestQuote`) to resolve the instrument's currency, and
+  validates sufficiency against `cash[currency]`.
 - **`LIMIT` does not reserve** cash or shares: available cash and held shares are computed
   only from `FILLED` orders. The sufficiency check here is "at placement time", not a hard reserve.
 - **`NEW` → `CANCELLED`** is the only later path (see [`cancel-order.md`](./cancel-order.md)).

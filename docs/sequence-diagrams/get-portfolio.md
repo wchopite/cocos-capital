@@ -27,9 +27,9 @@ sequenceDiagram
     DB-->>OR: OrderOrmEntity[]
     Note over OR: map → Domain Order[]
     OR-->>HUC: Order[]
-    Note over HUC: computeHoldings(orders) → { availableCash, positions }
+    Note over HUC: computeHoldings(orders) → { cash: { ARS, USD }, positions }
     HUC-->>HA: Holdings
-    HA-->>UC: { availableCash, positions }
+    HA-->>UC: { cash: { ARS, USD }, positions }
 
     loop for each position (instrumentId)
         UC->>QA: getLatestQuote(instrumentId)
@@ -40,12 +40,12 @@ sequenceDiagram
         Note over MR: toQuote → close/previousClose (cents)
         MR-->>QUC: Quote
         QUC-->>QA: Quote
-        QA-->>UC: { instrumentId, close, previousClose }
+        QA-->>UC: { instrumentId, close, previousClose, currency }
         Note over UC: quotes.set(instrumentId, quote)
     end
 
     Note over UC: computePortfolio(holdings, quotes)
-    Note over UC: filter quantity ≤ 0 · marketValue = qty × close<br/>dailyReturn = (close − previousClose) / previousClose × 100<br/>totalValue = availableCash + Σ marketValue
+    Note over UC: filter quantity ≤ 0 · marketValue = qty × close<br/>dailyReturn = (close − previousClose) / previousClose × 100<br/>totalValue = cash + Σ marketValue (per currency)
     UC-->>CTRL: Portfolio
     Note over CTRL: PortfolioDto.fromDomain → fromCents(...)
     CTRL-->>C: 200 PortfolioDto
@@ -59,5 +59,9 @@ sequenceDiagram
   is excluded from the valuation (positions you don't own are not shown).
 - **`dailyReturn`** is daily (`close` vs `previousClose`), in %, rounded to 2 decimals.
   `previousClose = 0` → return `0` (no division by zero).
+- **Multi-currency**: `cash` and `totalValue` are per currency (`{ ARS, USD }`), and each
+  position's `marketValue` carries its currency. No FX conversion: ARS and USD stay separate.
+- **Cached quotes**: `getLatestQuote` is served by a cache-aside decorator
+  (`CachedGetLatestQuote` → Redis), so the `QUC → MR → DB` hop only happens on a cache miss.
 - N+1 quotes: one query per position; acceptable at this size (see `interview-prep.md §2`
   for the composite index and read-model as the evolution path).

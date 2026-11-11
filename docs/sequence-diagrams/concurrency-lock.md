@@ -19,7 +19,7 @@ sequenceDiagram
         OR->>DB: BEGIN
         OR->>DB: SELECT id FROM users WHERE id = $1 FOR UPDATE
         Note over DB: request A acquires the lock
-        OR->>DB: SELECT FILLED orders → availableCash = $100
+        OR->>DB: SELECT FILLED orders → cash = $100
         Note over UC: $100 ≥ $80 → FILLED
         UC->>OR: save(FILLED)
         OR->>DB: INSERT (cash is now $20)
@@ -32,7 +32,7 @@ sequenceDiagram
         OR->>DB: BEGIN
         OR->>DB: SELECT id FROM users WHERE id = $1 FOR UPDATE
         Note over DB: request B blocks until A commits
-        OR->>DB: SELECT FILLED orders → availableCash = $20
+        OR->>DB: SELECT FILLED orders → cash = $20
         Note over UC: $20 < $80 → REJECTED
         UC->>OR: save(REJECTED)
         OR->>DB: INSERT (REJECTED, no cash moved)

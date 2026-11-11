@@ -16,7 +16,8 @@ Execution sequence of each endpoint, walking the hexagonal layers
 
 > `GetLatestQuote` (internal `instruments` use case) and `GetHoldings` (`orders`) have no
 > HTTP endpoint of their own: they appear inside the `POST /orders` and `GET /portfolio`
-> flows as cross-module calls through adapters.
+> flows as cross-module calls through adapters. `GetLatestQuote` is wrapped in a cache-aside
+> decorator (`CachedGetLatestQuote` → Redis), so those quote calls are cached.
 
 ## System overview
 
@@ -91,6 +92,8 @@ graph TD
   - Input controller: `toCents(amount|price)`.
   - Persistence mapper / output DTO: `toCents`/`fromCents`.
 - `fromCents` **rejects negatives** (positive magnitudes): the sign is decided by the operation.
+- **Multi-currency**: money carries a `currency` (`ARS`/`USD`); cash is tracked per currency
+  (`{ ARS, USD }`), never mixed or converted.
 
 ### Ports (dependency rule)
 

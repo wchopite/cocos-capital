@@ -53,9 +53,10 @@ stateDiagram-v2
 - **Insufficient** → the order is saved with `REJECTED`:
   - `BUY`: available cash must cover the cost (`close × size` for MARKET, `limit × size` for LIMIT).
   - `SELL`: held shares must cover `size`.
-- **Quantity** → either an exact share count, or a total amount in ARS (`size = floor(amount / price)`, no fractional shares).
-- **Transfers** → `CASH_IN`/`CASH_OUT` are `MARKET` orders on the ARS instrument that fill immediately.
-- **Cash (ARS)** → modeled as a `MONEDA` instrument (id `66`).
+- **Quantity** → either an exact share count, or a total amount in the order's currency (`size = floor(amount / price)`, no fractional shares).
+- **Transfers** → `CASH_IN`/`CASH_OUT` are `MARKET` orders on the cash instrument (ARS or USD) that fill immediately.
+- **Cash** → modeled as `MONEDA` instruments: ARS (id `66`) and USD (id `67`).
+- **Currency** → each instrument trades in `ARS` or `USD`; the order takes the instrument's currency. Cash is tracked per currency (no FX conversion).
 
 ## `size` semantics
 
@@ -64,7 +65,7 @@ The `size` column depends on `side`:
 | `side` | `size` means |
 | --- | --- |
 | `BUY` / `SELL` | number of shares |
-| `CASH_IN` / `CASH_OUT` | amount in ARS (with `price = 1`) |
+| `CASH_IN` / `CASH_OUT` | amount in the order's currency (with `price = 1`) |
 
 ## Notes
 
