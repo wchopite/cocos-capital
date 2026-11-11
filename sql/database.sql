@@ -190,7 +190,8 @@ INSERT INTO
   instruments (ticker, "name", "type", currency)
 VALUES
   ('ARS', 'PESOS', 'MONEDA', 'ARS'),
-  ('USD', 'DOLARES', 'MONEDA', 'USD');
+  ('USD', 'DOLARES', 'MONEDA', 'USD'),
+  ('AAPL', 'Apple CEDEAR', 'ACCIONES', 'USD');
 
 INSERT INTO
   "marketdata" (
@@ -1483,6 +1484,36 @@ VALUES
   );
 
 INSERT INTO
+  "marketdata" (
+    instrumentId,
+    "date",
+    "open",
+    high,
+    low,
+    "close",
+    previousclose
+  )
+VALUES
+  (
+    68,
+    '2023-07-13',
+    148.00000000,
+    151.00000000,
+    147.50000000,
+    150.00000000,
+    148.00000000
+  ),
+  (
+    68,
+    '2023-07-14',
+    150.00000000,
+    153.00000000,
+    149.50000000,
+    152.50000000,
+    150.00000000
+  );
+
+INSERT INTO
   "orders" (
     instrumentId,
     userId,
@@ -1608,6 +1639,31 @@ VALUES
     'FILLED',
     'MARKET',
     '2023-07-13 15:13:20'
+  );
+
+INSERT INTO
+  "orders" (
+    instrumentId,
+    userId,
+    size,
+    price,
+    side,
+    status,
+    type,
+    datetime,
+    currency
+  )
+VALUES
+  (
+    67,
+    1,
+    10000,
+    1,
+    'CASH_IN',
+    'FILLED',
+    'MARKET',
+    '2023-07-12 12:00:00',
+    'USD'
   );
 
 -- -------------------------------------

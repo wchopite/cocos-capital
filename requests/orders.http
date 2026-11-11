@@ -78,3 +78,27 @@ Content-Type: application/json
 ### Cancel a NEW order (replace :orderId with the returned id)
 DELETE {{host}}/orders/:orderId
 X-User-Id: {{userId}}
+
+### MARKET BUY in USD (AAPL CEDEAR, fills immediately at the last close)
+POST {{host}}/orders
+X-User-Id: {{userId}}
+Content-Type: application/json
+
+{
+  "instrumentId": 68,
+  "side": "BUY",
+  "type": "MARKET",
+  "size": 10
+}
+
+### SELL in USD (AAPL CEDEAR, fills immediately)
+POST {{host}}/orders
+X-User-Id: {{userId}}
+Content-Type: application/json
+
+{
+  "instrumentId": 68,
+  "side": "SELL",
+  "type": "MARKET",
+  "size": 5
+}
