@@ -2,12 +2,11 @@ import type { Quote } from "../../domain/models/quote";
 import type { GetLatestQuote } from "../../domain/ports/in/get-latest-quote.port";
 import type { QuoteCache } from "../../domain/ports/out/quote-cache.port";
 
-const QUOTE_CACHE_TTL_SECONDS = 30;
-
 export class CachedGetLatestQuote implements GetLatestQuote {
   public constructor(
     private readonly inner: GetLatestQuote,
     private readonly cache: QuoteCache,
+    private readonly ttlSeconds: number,
   ) {}
 
   public async execute(instrumentId: number): Promise<Quote> {
@@ -33,7 +32,7 @@ export class CachedGetLatestQuote implements GetLatestQuote {
 
   private async trySet(instrumentId: number, quote: Quote): Promise<void> {
     try {
-      await this.cache.set(instrumentId, quote, QUOTE_CACHE_TTL_SECONDS);
+      await this.cache.set(instrumentId, quote, this.ttlSeconds);
     } catch {
       // best-effort: a cache failure must not break the request
     }

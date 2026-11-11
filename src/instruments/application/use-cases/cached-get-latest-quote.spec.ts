@@ -36,7 +36,7 @@ describe("CachedGetLatestQuote", () => {
     const { inner, cache, execute, get, set } = createFakes();
     get.mockResolvedValue(quote);
 
-    const useCase = new CachedGetLatestQuote(inner, cache);
+    const useCase = new CachedGetLatestQuote(inner, cache, 30);
 
     const result = await useCase.execute(47);
 
@@ -49,7 +49,7 @@ describe("CachedGetLatestQuote", () => {
   it("calls the inner use case on a miss and stores the result", async () => {
     const { inner, cache, execute, set } = createFakes();
 
-    const useCase = new CachedGetLatestQuote(inner, cache);
+    const useCase = new CachedGetLatestQuote(inner, cache, 30);
 
     const result = await useCase.execute(47);
 
@@ -58,11 +58,21 @@ describe("CachedGetLatestQuote", () => {
     expect(set).toHaveBeenCalledWith(47, quote, expect.any(Number));
   });
 
+  it("stores the quote with the configured TTL", async () => {
+    const { inner, cache, set } = createFakes();
+
+    const useCase = new CachedGetLatestQuote(inner, cache, 120);
+
+    await useCase.execute(47);
+
+    expect(set).toHaveBeenCalledWith(47, quote, 120);
+  });
+
   it("falls back to the inner use case when the cache fails", async () => {
     const { inner, cache, execute, get } = createFakes();
     get.mockRejectedValue(new Error("redis down"));
 
-    const useCase = new CachedGetLatestQuote(inner, cache);
+    const useCase = new CachedGetLatestQuote(inner, cache, 30);
 
     const result = await useCase.execute(47);
 

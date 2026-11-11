@@ -8,6 +8,10 @@ export const appConfig = registerAs("app", () => ({
     process.env.LOG_PRETTY !== undefined
       ? process.env.LOG_PRETTY === "true"
       : process.env.NODE_ENV === "development",
+  quoteCacheTtlSeconds: Number.parseInt(
+    process.env.QUOTE_CACHE_TTL_SECONDS ?? "30",
+    10,
+  ),
 }));
 
 export const databaseConfig = registerAs("database", () => ({

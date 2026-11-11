@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CachedGetLatestQuote } from "./application/use-cases/cached-get-latest-quote";
 import { GetLatestQuoteUseCase } from "./application/use-cases/get-latest-quote.use-case";
@@ -29,9 +30,17 @@ import { TypeOrmMarketDataRepository } from "./infrastructure/persistence/reposi
     { provide: QUOTE_CACHE, useClass: RedisQuoteCache },
     {
       provide: GET_LATEST_QUOTE,
-      useFactory: (inner: GetLatestQuoteUseCase, cache: QuoteCache) =>
-        new CachedGetLatestQuote(inner, cache),
-      inject: [GetLatestQuoteUseCase, QUOTE_CACHE],
+      useFactory: (
+        inner: GetLatestQuoteUseCase,
+        cache: QuoteCache,
+        config: ConfigService,
+      ) =>
+        new CachedGetLatestQuote(
+          inner,
+          cache,
+          config.get<number>("app.quoteCacheTtlSeconds") ?? 30,
+        ),
+      inject: [GetLatestQuoteUseCase, QUOTE_CACHE, ConfigService],
     },
     { provide: INSTRUMENT_REPOSITORY, useClass: TypeOrmInstrumentRepository },
     { provide: MARKET_DATA_REPOSITORY, useClass: TypeOrmMarketDataRepository },
